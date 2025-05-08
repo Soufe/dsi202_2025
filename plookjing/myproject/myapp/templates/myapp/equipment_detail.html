@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ equipment.name }} | รายละเอียดอุปกรณ์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Noto Sans Thai', sans-serif;
+      background-color: #D5E1ED;
+    }
+
+    header {
+      background-color: #D55E02;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: white;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-links a {
+      margin-left: 1.5rem;
+      text-decoration: none;
+      color: white;
+      font-weight: bold;
+    }
+
+    .detail-container {
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .detail-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: 12px;
+    }
+
+    .detail-info {
+      margin-top: 1.5rem;
+    }
+
+    .detail-info h2 {
+      color: #0D3F31;
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .detail-info p {
+      font-size: 1.2rem;
+      color: #FB7E2B;
+    }
+
+    .buy-btn {
+      margin-top: 1.5rem;
+      display: inline-block;
+      background-color: #D55E02;
+      color: white;
+      padding: 0.6rem 1.5rem;
+      text-decoration: none;
+      font-weight: bold;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="font-size: 1.5rem; font-weight: bold;">PLOOKJING</div>
+    <div class="nav-links">
+      <a href="{% url 'tree_list' %}">ปลูกต้นไม้</a>
+      <a href="{% url 'equipment_list' %}">ซื้ออุปกรณ์</a>
+      <a href="{% url 'notification_list' %}">แจ้งเตือน</a>
+    </div>
+  </header>
+
+  <div class="detail-container">
+    <img class="detail-image" src="{{ equipment.image_url }}" alt="{{ equipment.name }}">
+    <div class="detail-info">
+      <h2>{{ equipment.name }}</h2>
+      <p>ราคา {{ equipment.price }} บาท</p>
+      <a class="buy-btn" href="#">สั่งซื้ออุปกรณ์นี้</a>
+    </div>
+  </div>
+</body>
+</html>

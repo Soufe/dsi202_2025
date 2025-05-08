@@ -1,0 +1,33 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('trees/', views.tree_list, name='tree_list'),
+    path('trees/<int:tree_id>/', views.tree_detail, name='tree_detail'),
+    path('equipment/', views.equipment_list, name='equipment_list'),
+    path('equipment/<int:equipment_id>/', views.equipment_detail, name='equipment_detail'),
+    path('purchase/<int:equipment_id>/', views.purchase_equipment, name='purchase_equipment'),
+    path('plant/<int:tree_id>/', views.plant_tree, name='plant_tree'),
+    path('select-location/<int:tree_id>/', views.select_location_for_tree, name='select_location_for_tree'),
+    path('plant-at-location/', views.plant_tree_at_location, name='plant_tree_at_location'),
+    path('payment/', views.payment, name='payment'),
+    path('payment/<int:tree_id>/', views.payment, name='payment_with_id'),
+    path('notifications/', views.notification_list, name='notification_list'),
+    path('my-trees/', views.my_trees, name='my_trees'),
+    path('plant-at-location/', views.plant_tree_at_location, name='plant_tree_at_location'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('news/', views.news_list, name='news_list'),
+    path('search/', views.search_results, name='search_results'),
+    path('community/', views.community, name='community'),
+    path('about/', views.about, name='about'),
+    path('my-trees/', views.my_trees, name='my_trees'),
+    path('profile/', views.user_profile, name='user_profile'),
+    path('profile/edit/', views.edit_profile, name='edit_profile'),
+    path('news/', views.news_list, name='news_list'),
+    path('search/', views.search_results, name='search_results'),
+    path('about/', views.about, name='about'),
+    path('payment/<int:tree_id>/', views.payment, name='payment'),
+    path('plant/<int:tree_id>/', views.plant_tree, name='plant_tree'),
+]

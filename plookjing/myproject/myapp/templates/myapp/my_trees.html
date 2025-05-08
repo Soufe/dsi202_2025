@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}ต้นไม้ของฉัน | PLOOKJING{% endblock %}
+
+{% block content %}
+<h1 style="text-align: center; color: #0D3F31; margin-bottom: 2rem;">ต้นไม้ที่คุณปลูกแล้ว 🌱</h1>
+
+{% if user_trees %}
+  <div class="tree-container">
+    {% for planting in user_trees %}
+      <div class="tree-card">
+        <h2>{{ planting.tree.name }}</h2>
+        {% if planting.location %}
+          <p>ปลูกที่: {{ planting.location.name }}</p>
+        {% else %}
+          <p>ปลูกที่: ไม่ระบุพื้นที่</p>
+        {% endif %}
+        <small>วันที่ปลูก: {{ planting.planting_date|date:"d M Y" }}</small>
+      </div>
+    {% endfor %}
+  </div>
+{% else %}
+  <p style="text-align: center; font-size: 1.2rem; color: #D55E02;">ยังไม่มีการปลูกต้นไม้เลยน้า 🌱</p>
+{% endif %}
+
+<style>
+  .tree-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+  }
+
+  .tree-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    width: 260px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    text-align: center;
+    transition: transform 0.3s;
+  }
+
+  .tree-card:hover {
+    transform: translateY(-5px);
+  }
+
+  @media (max-width: 600px) {
+    .tree-card {
+      width: 90%;
+    }
+  }
+</style>
+{% endblock %}

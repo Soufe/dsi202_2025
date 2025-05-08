@@ -1,2 +1,2 @@
 ## dsi202
-hello my name is ploykronggg
+hello my name is ploykrong
