@@ -73,8 +73,9 @@ def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login')
+            user = form.save()
+            login(request, user)  # เข้าสู่ระบบทันทีหลังสมัคร
+            return redirect('home')  # หรือเปลี่ยนเป็นหน้าอื่นที่คุณต้องการ
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})

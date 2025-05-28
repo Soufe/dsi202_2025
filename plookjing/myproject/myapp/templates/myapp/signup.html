@@ -1,12 +1,15 @@
-{% extends 'base.html' %}
-{% block title %}Sign Up{% endblock %}
+{% extends "base.html" %}
+
+{% block title %}สมัครสมาชิก - PLOOKJING{% endblock %}
+
 {% block content %}
-<div class="max-w-md mx-auto mt-10 p-6 bg-white rounded shadow">
-  <h2 class="text-2xl font-bold mb-4">Create an account</h2>
-  <form method="post">
+<div class="max-w-md mx-auto bg-white p-8 rounded shadow">
+  <h2 class="text-2xl font-semibold mb-4 text-center">สมัครสมาชิก</h2>
+  <form method="POST" class="space-y-4">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Sign up</button>
+    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">สมัครสมาชิก</button>
   </form>
+  <p class="mt-4 text-center text-sm">มีบัญชีแล้ว? <a href="{% url 'login' %}" class="text-green-700 underline">เข้าสู่ระบบ</a></p>
 </div>
 {% endblock %}
