@@ -16,21 +16,23 @@
   <!-- Navbar -->
   <nav class="bg-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-      <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
-      <ul class="flex space-x-6 text-green-800 font-semibold">
-        <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
-        <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">เลือกต้นไม้</a></li>
-        <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">ร้านอุปกรณ์</a></li>
-        <li><a href="{% url 'myapp:my_trees' %}" class="hover:text-orange-500">ต้นไม้ของฉัน</a></li>
-        <li><a href="{% url 'myapp:view_notifications' %}" class="hover:text-orange-500">แจ้งเตือน</a></li>
-        <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
-      </ul>
+      <!-- Left section: Logo + Menu -->
+      <div class="flex items-center space-x-8">
+        <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
+        <ul class="flex space-x-6 text-green-800 font-normal">
+          <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
+          <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">ต้นไม้</a></li>
+          <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">อุปกรณ์</a></li>
+          <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
+        </ul>
+      </div>
+
+      <!-- Right section: Profile -->
       <a href="{% url 'myapp:user_profile' %}">
         <img src="{% static 'images/profile-icon.svg' %}" alt="Profile" class="w-8 h-8 rounded-full border hover:ring-2">
       </a>
     </div>
   </nav>
-
 
   <!-- Page Content -->
   <main class="max-w-7xl mx-auto px-4 py-8">
@@ -44,4 +46,3 @@
 
 </body>
 </html>
-
