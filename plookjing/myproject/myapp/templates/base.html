@@ -1,29 +1,47 @@
-<!-- 🌱 Navbar -->
-<nav class="bg-white shadow px-6 py-3 flex justify-between items-center">
-  <a href="{% url 'home' %}" class="text-green-700 text-xl font-bold">PLOOKJING</a>
-  
-  <div class="flex items-center space-x-6 text-gray-700 text-sm font-semibold">
-    <a href="{% url 'home' %}" class="hover:text-orange-600">หน้าหลัก</a>
-    <a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-600">เลือกต้นไม้</a>
-    <a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-600">ร้านอุปกรณ์</a>
-    <a href="{% url 'myapp:mytree' %}" class="hover:text-orange-600">ต้นไม้ของฉัน</a>
-    <a href="{% url 'myapp:notification_list' %}" class="hover:text-orange-600">แจ้งเตือน</a>
-    <a href="{% url 'myapp:about' %}" class="hover:text-orange-600">เกี่ยวกับเรา</a>
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}PLOOKJING{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Prompt', sans-serif; }
+  </style>
+</head>
+<body class="bg-green-50 text-gray-800">
 
-    <!-- 👤 Profile Dropdown -->
-    <div class="relative group">
-      <img src="https://i.postimg.cc/FsKfhghK/profile-icon.png"
-           alt="Profile"
-           class="w-9 h-9 rounded-full border cursor-pointer ring-2 ring-green-400">
-      <div class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
-        {% if user.is_authenticated %}
-          <a href="{% url 'user_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">โปรไฟล์</a>
-          <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">ออกจากระบบ</a>
-        {% else %}
-          <a href="{% url 'login' %}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100">เข้าสู่ระบบ</a>
-          <a href="{% url 'signup' %}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100">สมัครสมาชิก</a>
-        {% endif %}
-      </div>
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
+      <ul class="flex space-x-6 text-green-800 font-semibold">
+        <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
+        <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">เลือกต้นไม้</a></li>
+        <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">ร้านอุปกรณ์</a></li>
+        <li><a href="{% url 'myapp:my_trees' %}" class="hover:text-orange-500">ต้นไม้ของฉัน</a></li>
+        <li><a href="{% url 'myapp:view_notifications' %}" class="hover:text-orange-500">แจ้งเตือน</a></li>
+        <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
+      </ul>
+      <a href="{% url 'myapp:user_profile' %}">
+        <img src="{% static 'images/profile-icon.svg' %}" alt="Profile" class="w-8 h-8 rounded-full border hover:ring-2">
+      </a>
     </div>
-  </div>
-</nav>
+  </nav>
+
+
+  <!-- Page Content -->
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Footer -->
+  <footer class="text-center py-6 text-gray-500 text-sm">
+    © 2025 PLOOKJING. All rights reserved.
+  </footer>
+
+</body>
+</html>
+

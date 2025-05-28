@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+{% block title %}โปรไฟล์ของฉัน | PLOOKJING{% endblock %}
+{% block content %}
+<div class="p-6">
+  <h2 class="text-2xl font-bold text-green-800 mb-4">👤 โปรไฟล์ของฉัน</h2>
+  <p><strong>ชื่อผู้ใช้:</strong> {{ request.user.username }}</p>
+  <p><strong>อีเมล:</strong> {{ request.user.email }}</p>
+</div>
+{% endblock %}

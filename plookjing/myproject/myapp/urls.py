@@ -27,9 +27,11 @@ urlpatterns = [
     path('purchase-history/', views.purchase_history, name='purchase_history'),
 
     # แจ้งเตือน
-    path('notifications/', views.notifications, name='notifications'),
+    path('notifications/', views.notifications, name='view_notifications'),
 
     # เกี่ยวกับเรา
     path('about/', views.about, name='about'),
+
+    path('profile/', views.user_profile, name='user_profile'),
 
 ]

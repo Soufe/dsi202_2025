@@ -1,57 +1,34 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <title>เลือกต้นไม้ | PLOOKJING</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+{% extends 'base.html' %}
 
-  <style>
-    body {
-      font-family: 'Prompt', sans-serif;
-    }
-  </style>
-</head>
-<body class="bg-green-50 text-gray-800 min-h-screen flex flex-col">
+{% block content %}
+  <h1 class="text-3xl font-bold text-green-800 mb-6 text-center">เลือกต้นไม้ของคุณ</h1>
 
-  <!-- 🌱 Header -->
-  <header class="bg-green-700 text-white shadow-md py-4 px-6">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="{% url 'myapp:home' %}" class="text-xl font-bold hover:underline">PLOOKJING</a>
-      <nav class="space-x-4">
-        <a href="{% url 'myapp:home' %}" class="hover:underline">หน้าหลัก</a>
-        <a href="{% url 'myapp:select_tree' %}" class="hover:underline">เลือกต้นไม้</a>
-        <a href="{% url 'myapp:equipment_list' %}" class="hover:underline">ร้านอุปกรณ์</a>
-        <a href="{% url 'myapp:my_trees' %}" class="hover:underline">ต้นไม้ของฉัน</a>
-        <a href="{% url 'myapp:notifications' %}" class="hover:underline">แจ้งเตือน</a>
-        <a href="{% url 'myapp:about' %}" class="hover:underline">เกี่ยวกับเรา</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- Main content -->
-  <div class="p-6">
-    <h1 class="text-3xl font-bold text-green-800 mb-6">เลือกต้นไม้ของคุณ</h1>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-      {% for tree in trees %}
-        <div class="bg-white rounded-xl shadow p-4 hover:shadow-lg transition">
-          {% if tree.image %}
-            <img src="{{ tree.image.url }}" alt="{{ tree.name }}" class="w-full h-48 object-cover rounded mb-3">
-          {% endif %}
-          <h2 class="text-xl font-semibold text-green-700">{{ tree.name }}</h2>
-          <p class="text-gray-500 text-sm">{{ tree.species }}</p>
-          <p class="text-orange-600 font-bold">{{ tree.price|floatformat:2 }} บาท</p>
-          <a href="{% url 'myapp:tree_detail' tree.id %}" class="inline-block mt-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
-            ดูรายละเอียด
-          </a>
-        </div>
-      {% empty %}
-        <p class="col-span-full text-center text-gray-500">ยังไม่มีต้นไม้ในระบบ</p>
-      {% endfor %}
-    </div>
+  <!-- 🔍 Centered Search bar -->
+  <div class="flex justify-center mb-6">
+    <form method="GET" action="" class="w-full max-w-md">
+      <div class="flex items-center border rounded-full bg-white shadow-sm overflow-hidden">
+        <input type="text" name="q" placeholder="ค้นหาต้นไม้..." value="{{ request.GET.q }}" 
+               class="flex-1 px-4 py-2 focus:outline-none text-sm" />
+        <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-r-full">
+          ค้นหา
+        </button>
+      </div>
+    </form>
   </div>
 
-</body>
-</html>
+  <!-- 🌳 Tree Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for tree in trees %}
+      <a href="{% url 'myapp:tree_detail' tree.id %}" class="block bg-white rounded-xl shadow p-4 hover:shadow-lg transition hover:ring-2 hover:ring-green-500">
+        {% if tree.image %}
+          <img src="{{ tree.image.url }}" alt="{{ tree.name }}" class="w-full h-48 object-cover rounded mb-3">
+        {% endif %}
+        <h2 class="text-xl font-semibold text-green-700">{{ tree.name }}</h2>
+        <p class="text-gray-500 text-sm">{{ tree.species }}</p>
+        <p class="text-orange-600 font-bold">{{ tree.price|floatformat:2 }} บาท</p>
+      </a>
+    {% empty %}
+      <p class="col-span-full text-center text-gray-500">ยังไม่มีต้นไม้ในระบบ</p>
+    {% endfor %}
+  </div>
+{% endblock %}

@@ -2,6 +2,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from .models import Tree  # ✅ เพิ่ม: โหลดรายการต้นไม้จาก model Tree
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 
 # ✅ Home
 def home(request):
@@ -9,7 +10,11 @@ def home(request):
 
 # ✅ Select Tree (แสดงรายการต้นไม้)
 def select_tree(request):
-    trees = Tree.objects.all()
+    query = request.GET.get('q')
+    if query:
+        trees = Tree.objects.filter(name__icontains=query)
+    else:
+        trees = Tree.objects.all()
     return render(request, 'myapp/select_tree.html', {'trees': trees})
 
 def choose_species(request):
@@ -49,7 +54,7 @@ def view_care_notifications(request):
     return render(request, 'myapp/view_care_notifications.html')
 
 def notifications(request):
-    return render(request, 'notifications.html')
+    return render(request, 'view_notifications.html')
 
 # ✅ My Trees
 def my_trees(request):
@@ -87,3 +92,8 @@ def signup(request):
 # ✅ About
 def about(request):
     return render(request, 'myapp/about.html')
+
+@login_required
+def user_profile(request):
+    user = request.user
+    return render(request, 'myapp/user_profile.html', {'user': user})

@@ -1,29 +1,30 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block title %}หน้าหลัก | PLOOKJING{% endblock %}
 
 {% block content %}
-<div class="p-6 bg-green-50 min-h-screen">
-  <h1 class="text-3xl font-bold text-green-800 mb-4">ยินดีต้อนรับสู่ PLOOKJING 🌱</h1>
-  <p class="text-gray-700 mb-6">แพลตฟอร์มสำหรับการปลูกต้นไม้ทางไกล ที่ใครๆ ก็เริ่มต้นได้</p>
+<div class="text-center py-12">
+  <h1 class="text-4xl font-bold text-green-800 mb-4">ยินดีต้อนรับสู่ PLOOKJING</h1>
+  <p class="text-gray-700 text-lg mb-6">ร่วมปลูกต้นไม้ เพื่ออนาคตที่เขียวขจี</p>
+  <a href="{% url 'myapp:select_tree' %}" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-full shadow-lg text-lg transition">
+    เริ่มเลือกต้นไม้
+  </a>
+</div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    <!-- ตัวอย่างการ์ดต่าง ๆ -->
-    <div class="bg-white p-4 rounded-xl shadow hover:shadow-lg transition">
-      <h2 class="text-xl font-semibold text-green-700 mb-2">เลือกต้นไม้</h2>
-      <p class="text-sm text-gray-600 mb-2">ค้นหาต้นไม้ที่คุณอยากปลูก</p>
-      <a href="{% url 'myapp:select_tree' %}" class="text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded inline-block">
-        ไปยังหน้าเลือกต้นไม้
-      </a>
-    </div>
-    <div class="bg-white p-4 rounded-xl shadow hover:shadow-lg transition">
-      <h2 class="text-xl font-semibold text-green-700 mb-2">ร้านอุปกรณ์</h2>
-      <p class="text-sm text-gray-600 mb-2">เลือกซื้ออุปกรณ์สำหรับปลูกต้นไม้</p>
-      <a href="{% url 'myapp:equipment_list' %}" class="text-white bg-orange-500 hover:bg-orange-600 px-4 py-2 rounded inline-block">
-        ไปยังร้านอุปกรณ์
-      </a>
-    </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+  <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+    <h3 class="text-xl font-semibold text-green-700 mb-2">เลือกต้นไม้</h3>
+    <p class="text-gray-600 mb-3">เลือกต้นไม้ที่คุณอยากปลูกจากรายการของเรา</p>
+    <a href="{% url 'myapp:select_tree' %}" class="text-green-600 hover:underline">ดูต้นไม้</a>
+  </div>
+  <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+    <h3 class="text-xl font-semibold text-green-700 mb-2">ซื้ออุปกรณ์</h3>
+    <p class="text-gray-600 mb-3">เลือกอุปกรณ์ปลูกต้นไม้ที่เหมาะกับคุณ</p>
+    <a href="{% url 'myapp:equipment_list' %}" class="text-green-600 hover:underline">ดูอุปกรณ์</a>
+  </div>
+  <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center">
+    <h3 class="text-xl font-semibold text-green-700 mb-2">ติดตามต้นไม้</h3>
+    <p class="text-gray-600 mb-3">ดูความคืบหน้าและสถานะของต้นไม้ที่คุณปลูก</p>
+    <a href="{% url 'myapp:my_trees' %}" class="text-green-600 hover:underline">ต้นไม้ของฉัน</a>
   </div>
 </div>
 {% endblock %}
