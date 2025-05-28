@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block title %}เข้าสู่ระบบ | PLOOKJING{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
+  <h2 class="text-2xl font-bold mb-6 text-center text-green-700">เข้าสู่ระบบ</h2>
+  <form method="POST" action="{% url 'account_login' %}" class="space-y-4">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
+      เข้าสู่ระบบ
+    </button>
+  </form>
+  <p class="mt-4 text-center text-sm text-gray-600">
+    ยังไม่มีบัญชี? <a href="{% url 'account_signup' %}" class="text-orange-600 hover:underline">สมัครสมาชิก</a>
+  </p>
+</div>
+{% endblock %}
