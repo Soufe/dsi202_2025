@@ -6,33 +6,33 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Prompt', sans-serif;
-      background-color: #f0fdf4;
     }
   </style>
 </head>
-<body class="min-h-screen">
+<body class="bg-green-50 text-gray-800 min-h-screen flex flex-col">
 
-  <!-- Navigation bar -->
-  <nav class="bg-white shadow-md px-6 py-4 flex justify-between items-center">
-    <div class="text-2xl font-bold text-green-700">
-      🌱 PLOOKJING
+  <!-- 🌱 Header -->
+  <header class="bg-green-700 text-white shadow-md py-4 px-6">
+    <div class="container mx-auto flex justify-between items-center">
+      <a href="{% url 'myapp:home' %}" class="text-xl font-bold hover:underline">PLOOKJING</a>
+      <nav class="space-x-4">
+        <a href="{% url 'myapp:home' %}" class="hover:underline">หน้าหลัก</a>
+        <a href="{% url 'myapp:select_tree' %}" class="hover:underline">เลือกต้นไม้</a>
+        <a href="{% url 'myapp:equipment_list' %}" class="hover:underline">ร้านอุปกรณ์</a>
+        <a href="{% url 'myapp:my_trees' %}" class="hover:underline">ต้นไม้ของฉัน</a>
+        <a href="{% url 'myapp:notifications' %}" class="hover:underline">แจ้งเตือน</a>
+        <a href="{% url 'myapp:about' %}" class="hover:underline">เกี่ยวกับเรา</a>
+      </nav>
     </div>
-    <div class="space-x-4 text-green-800 font-medium">
-      <a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าแรก</a>
-      <a href="{% url 'myapp:select_tree' %}" class="text-orange-600 font-bold">เลือกต้นไม้</a>
-      <a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">ร้านอุปกรณ์</a>
-      <a href="{% url 'myapp:my_trees' %}" class="hover:text-orange-500">ต้นไม้ของฉัน</a>
-      <a href="{% url 'myapp:notifications' %}" class="hover:text-orange-500">แจ้งเตือน</a>
-      <a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a>
-    </div>
-  </nav>
+  </header>
 
   <!-- Main content -->
   <div class="p-6">
-    <h1 class="text-3xl font-bold text-green-800 mb-6">🌳 เลือกต้นไม้ของคุณ</h1>
+    <h1 class="text-3xl font-bold text-green-800 mb-6">เลือกต้นไม้ของคุณ</h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {% for tree in trees %}

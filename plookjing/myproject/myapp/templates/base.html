@@ -1,120 +1,29 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <title>{% block title %}PLOOKJING{% endblock %}</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
-  <style>
-    body {
-      font-family: 'Prompt', sans-serif;
-    }
-  </style>
-</head>
-<body class="bg-green-50 text-gray-800 min-h-screen flex flex-col">
+<!-- 🌱 Navbar -->
+<nav class="bg-white shadow px-6 py-3 flex justify-between items-center">
+  <a href="{% url 'home' %}" class="text-green-700 text-xl font-bold">PLOOKJING</a>
+  
+  <div class="flex items-center space-x-6 text-gray-700 text-sm font-semibold">
+    <a href="{% url 'home' %}" class="hover:text-orange-600">หน้าหลัก</a>
+    <a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-600">เลือกต้นไม้</a>
+    <a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-600">ร้านอุปกรณ์</a>
+    <a href="{% url 'myapp:mytree' %}" class="hover:text-orange-600">ต้นไม้ของฉัน</a>
+    <a href="{% url 'myapp:notification_list' %}" class="hover:text-orange-600">แจ้งเตือน</a>
+    <a href="{% url 'myapp:about' %}" class="hover:text-orange-600">เกี่ยวกับเรา</a>
 
-  <!-- 🌱 Header -->
-  <header class="bg-green-700 text-white shadow-md py-4 px-6">
-    <div class="container mx-auto flex justify-between items-center">
-      <a href="{% url 'myapp:home' %}" class="text-xl font-bold hover:underline">PLOOKJING</a>
-      <nav class="space-x-4">
-        <a href="{% url 'myapp:home' %}" class="hover:underline">หน้าหลัก</a>
-        <a href="{% url 'myapp:select_tree' %}" class="hover:underline">เลือกต้นไม้</a>
-        <a href="{% url 'myapp:planting_plan' %}" class="hover:underline">แผนการปลูก</a>
-        <a href="{% url 'myapp:equipment_list' %}" class="hover:underline">ร้านอุปกรณ์</a>
-        <a href="{% url 'myapp:my_trees' %}" class="hover:underline">ต้นไม้ของฉัน</a>
-        <a href="{% url 'myapp:purchase_history' %}" class="hover:underline">ประวัติการสั่งซื้อ</a>
-        <a href="{% url 'myapp:notifications' %}" class="hover:underline">แจ้งเตือน</a>
-        <a href="{% url 'myapp:about' %}" class="hover:underline">เกี่ยวกับเรา</a>
-      </nav>
-    </div>
-  </header>
-
-  <!-- 🌿 Hero Banner -->
-  <section class="bg-white py-10 shadow-inner">
-    <div class="container mx-auto text-center">
-      <h2 class="text-3xl font-semibold text-green-800">TOP SALE</h2>
-      <p class="text-gray-600 mt-2">ลด 20% สำหรับสมาชิก PLOOKJING</p>
-      <a href="{% url 'myapp:select_tree' %}" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-5 rounded-full">เริ่มปลูกเลย</a>
-      <div class="mt-6 flex justify-center">
-        <img src="https://i.postimg.cc/90ZX7pWx/tree-pot.png" alt="tree sale" class="w-72">
+    <!-- 👤 Profile Dropdown -->
+    <div class="relative group">
+      <img src="https://i.postimg.cc/FsKfhghK/profile-icon.png"
+           alt="Profile"
+           class="w-9 h-9 rounded-full border cursor-pointer ring-2 ring-green-400">
+      <div class="absolute right-0 mt-2 w-40 bg-white rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-10">
+        {% if user.is_authenticated %}
+          <a href="{% url 'user_profile' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">โปรไฟล์</a>
+          <a href="{% url 'logout' %}" class="block px-4 py-2 text-sm text-red-600 hover:bg-red-100">ออกจากระบบ</a>
+        {% else %}
+          <a href="{% url 'login' %}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100">เข้าสู่ระบบ</a>
+          <a href="{% url 'signup' %}" class="block px-4 py-2 text-sm text-green-700 hover:bg-green-100">สมัครสมาชิก</a>
+        {% endif %}
       </div>
     </div>
-  </section>
-
-  <!-- 🌿 Benefits -->
-  <section class="bg-gray-100 py-6">
-    <div class="container mx-auto flex flex-wrap justify-around text-center">
-      <div class="w-1/3 p-4">
-        <p class="text-green-700 font-semibold">📦 ส่งฟรี</p>
-        <p class="text-sm">เมื่อซื้อเกิน 1,000 บาท</p>
-      </div>
-      <div class="w-1/3 p-4">
-        <p class="text-green-700 font-semibold">🔒 จ่ายปลอดภัย</p>
-        <p class="text-sm">รองรับการโอน QR และ slip</p>
-      </div>
-      <div class="w-1/3 p-4">
-        <p class="text-green-700 font-semibold">🌟 บริการจริงใจ</p>
-        <p class="text-sm">รับประกันต้นไม้ทุกต้น</p>
-      </div>
-    </div>
-  </section>
-
-  <!-- 🪴 Product Highlights -->
-  <section class="bg-white py-10">
-    <div class="container mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div class="bg-green-100 p-6 rounded-lg shadow">
-        <h3 class="text-lg font-bold text-green-800">ต้นไม้ขายดี</h3>
-        <p class="text-sm text-gray-600 mb-2">เหมาะกับบ้านและที่ทำงาน</p>
-        <a href="{% url 'myapp:select_tree' %}" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
-      </div>
-      <div class="bg-green-100 p-6 rounded-lg shadow">
-        <h3 class="text-lg font-bold text-green-800">ต้นไม้เพื่อสุขภาพ</h3>
-        <p class="text-sm text-gray-600 mb-2">ช่วยฟอกอากาศในบ้าน</p>
-        <a href="{% url 'myapp:select_tree' %}" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- 🛍 Our Products -->
-  <section class="bg-gray-50 py-10">
-    <div class="container mx-auto">
-      <h2 class="text-2xl font-bold text-center text-green-800 mb-6">สินค้าแนะนำ</h2>
-      <div class="flex justify-center mb-4 space-x-4 text-sm">
-        <a href="#" class="text-green-700 font-semibold underline">ต้นไม้ตั้งโต๊ะ</a>
-        <a href="#" class="text-gray-600 hover:underline">อุปกรณ์ปลูก</a>
-        <a href="#" class="text-gray-600 hover:underline">กระถาง</a>
-      </div>
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="bg-white p-4 rounded-lg shadow">
-          <img src="https://i.postimg.cc/dVkyZQy4/pot1.png" alt="Tree1" class="w-full h-40 object-cover mb-2">
-          <p class="text-sm text-gray-600">ยางนา</p>
-          <p class="font-bold text-green-800">฿129.00</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-          <img src="https://i.postimg.cc/4xvRcQBB/pot2.png" alt="Tree2" class="w-full h-40 object-cover mb-2">
-          <p class="text-sm text-gray-600">พญาสัตบรรณ</p>
-          <p class="font-bold text-green-800">฿149.00</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-          <img src="https://i.postimg.cc/XJDpxXZw/pot3.png" alt="Pot1" class="w-full h-40 object-cover mb-2">
-          <p class="text-sm text-gray-600">กระถางใหญ่</p>
-          <p class="font-bold text-green-800">฿89.00</p>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow">
-          <img src="https://i.postimg.cc/pd5B9vF6/pot4.png" alt="Pot2" class="w-full h-40 object-cover mb-2">
-          <p class="text-sm text-gray-600">กระถางลายหิน</p>
-          <p class="font-bold text-green-800">฿99.00</p>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- 🍃 Footer -->
-  <footer class="bg-green-700 text-white py-4 text-center">
-    <p class="text-sm">&copy; 2025 PLOOKJING. All rights reserved.</p>
-  </footer>
-
-</body>
-</html>
+  </div>
+</nav>
