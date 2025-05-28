@@ -16,6 +16,7 @@
   <!-- Navbar -->
   <nav class="bg-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      
       <!-- Left section: Logo + Menu -->
       <div class="flex items-center space-x-8">
         <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
@@ -27,10 +28,30 @@
         </ul>
       </div>
 
-      <!-- Right section: Profile -->
-      <a href="{% url 'myapp:user_profile' %}">
-        <img src="{% static 'images/profile-icon.svg' %}" alt="Profile" class="w-8 h-8 rounded-full border hover:ring-2">
-      </a>
+      <!-- Right section: Profile Dropdown -->
+      <div class="relative group">
+        <img src="{% static 'media/user.svg' %}" alt="Profile"
+             class="w-8 h-8 rounded-full border hover:ring-2 cursor-pointer">
+
+        <div class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition duration-200 z-50">
+          <div class="px-4 py-2 text-sm text-gray-800 border-b">
+            {% if user.is_authenticated %}
+              สวัสดี, <strong>{{ user.username }}</strong>
+            {% else %}
+              ยินดีต้อนรับ
+            {% endif %}
+          </div>
+          <ul class="text-sm text-gray-700">
+            {% if user.is_authenticated %}
+              <li><a href="{% url 'myapp:user_profile' %}" class="block px-4 py-2 hover:bg-gray-100">โปรไฟล์ของฉัน</a></li>
+              <li><a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-gray-100 text-red-500">ออกจากระบบ</a></li>
+            {% else %}
+              <li><a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-gray-100 text-green-700">เข้าสู่ระบบ</a></li>
+              <li><a href="{% url 'account_signup' %}" class="block px-4 py-2 hover:bg-gray-100 text-orange-600">สมัครสมาชิก</a></li>
+            {% endif %}
+          </ul>
+        </div>
+      </div>
     </div>
   </nav>
 
