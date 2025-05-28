@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
-{% block title %}Select Tree | PLOOKJING{% endblock %}
+
 {% block content %}
-<div class="p-6">
-  <h2 class="text-2xl font-bold text-green-800 mb-4">Select Tree</h2>
-  <p class="text-gray-700">This is the Select Tree page.</p>
+<div class="container mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold mb-6 text-green-800">เลือกต้นไม้ของคุณ</h1>
+  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+    {% for tree in trees %}
+      <div class="bg-white rounded-2xl shadow p-4 hover:shadow-lg transition">
+        <img src="{{ tree.image.url }}" alt="{{ tree.name }}" class="w-full h-48 object-cover rounded-lg mb-4">
+        <h2 class="text-xl font-semibold text-green-700">{{ tree.name }}</h2>
+        <p class="text-gray-500 text-sm mb-2">{{ tree.species }}</p>
+        <p class="text-orange-600 font-bold mb-4">{{ tree.price|floatformat:2 }} บาท</p>
+        <a href="{% url 'myapp:tree_detail' tree.id %}" class="inline-block bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">ดูรายละเอียด</a>
+      </div>
+    {% endfor %}
+  </div>
 </div>
 {% endblock %}

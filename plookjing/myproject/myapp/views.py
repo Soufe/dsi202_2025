@@ -1,14 +1,16 @@
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
+from .models import Tree  # ✅ เพิ่ม: โหลดรายการต้นไม้จาก model Tree
+from django.shortcuts import get_object_or_404
 
-# Home
+# ✅ Home
 def home(request):
     return render(request, 'myapp/home.html')
 
-# Select Tree
+# ✅ Select Tree (แสดงรายการต้นไม้)
 def select_tree(request):
-    return render(request, 'myapp/select_tree.html')
+    trees = Tree.objects.all()
+    return render(request, 'myapp/select_tree.html', {'trees': trees})
 
 def choose_species(request):
     return render(request, 'myapp/choose_species.html')
@@ -16,7 +18,7 @@ def choose_species(request):
 def specify_location(request):
     return render(request, 'myapp/specify_location.html')
 
-# Planting Plan
+# ✅ Planting Plan
 def planting_plan(request):
     return render(request, 'myapp/planting_plan.html')
 
@@ -29,7 +31,7 @@ def set_quantity(request):
 def subscribe(request):
     return render(request, 'myapp/subscribe.html')
 
-# Equipment Shop
+# ✅ Equipment Shop
 def equipment_shop(request):
     return render(request, 'myapp/equipment_shop.html')
 
@@ -42,19 +44,20 @@ def equipment_detail(request):
 def equipment_purchase(request):
     return render(request, 'myapp/purchase_equipment.html')
 
-# Notifications
+# ✅ Notifications
 def view_care_notifications(request):
     return render(request, 'myapp/view_care_notifications.html')
 
 def notifications(request):
     return render(request, 'notifications.html')
 
-# My Trees
+# ✅ My Trees
 def my_trees(request):
     return render(request, 'myapp/my_trees.html')
 
-def tree_detail(request):
-    return render(request, 'myapp/tree_detail.html')
+def tree_detail(request, tree_id):
+    tree = get_object_or_404(Tree, pk=tree_id)
+    return render(request, 'myapp/tree_detail.html', {'tree': tree})
 
 def growth_status(request):
     return render(request, 'myapp/growth_status.html')
@@ -62,20 +65,25 @@ def growth_status(request):
 def care_history(request):
     return render(request, 'myapp/care_history.html')
 
-# Purchase History
+# ✅ Purchase History
 def purchase_history(request):
     return render(request, 'myapp/purchase_history.html')
 
 def view_order(request):
     return render(request, 'myapp/view_order.html')
 
+# ✅ Signup (สามารถปิดการใช้งานได้หากไม่ใช้ระบบผู้ใช้)
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)  # เข้าสู่ระบบทันทีหลังสมัคร
-            return redirect('home')  # หรือเปลี่ยนเป็นหน้าอื่นที่คุณต้องการ
+            login(request, user)
+            return redirect('home')
     else:
         form = UserCreationForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'myapp/signup.html', {'form': form})
+
+# ✅ About
+def about(request):
+    return render(request, 'myapp/about.html')

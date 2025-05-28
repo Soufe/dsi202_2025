@@ -7,6 +7,7 @@ class Tree(models.Model):
     species = models.CharField(max_length=100, default="Unknown")
     description = models.TextField(blank=True)
     image = models.ImageField(upload_to='tree_images/', null=True, blank=True)
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=0)
 
     def __str__(self):
         return f"{self.name} ({self.species})"
