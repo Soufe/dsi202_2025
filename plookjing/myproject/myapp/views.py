@@ -7,7 +7,6 @@ def home(request):
     return render(request, 'myapp/home.html')
 
 # Select Tree
-@login_required
 def select_tree(request):
     return render(request, 'myapp/select_tree.html')
 
@@ -18,7 +17,6 @@ def specify_location(request):
     return render(request, 'myapp/specify_location.html')
 
 # Planting Plan
-@login_required
 def planting_plan(request):
     return render(request, 'myapp/planting_plan.html')
 
@@ -52,7 +50,6 @@ def notifications(request):
     return render(request, 'notifications.html')
 
 # My Trees
-@login_required
 def my_trees(request):
     return render(request, 'myapp/my_trees.html')
 
@@ -66,7 +63,6 @@ def care_history(request):
     return render(request, 'myapp/care_history.html')
 
 # Purchase History
-@login_required
 def purchase_history(request):
     return render(request, 'myapp/purchase_history.html')
 
