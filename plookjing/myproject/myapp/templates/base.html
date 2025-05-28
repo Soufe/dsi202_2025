@@ -17,16 +17,16 @@
   <!-- 🌱 Header -->
   <header class="bg-green-700 text-white shadow-md py-4 px-6">
     <div class="container mx-auto flex justify-between items-center">
-      <a href="/" class="text-xl font-bold hover:underline">PLOOKJING</a>
+      <a href="{% url 'myapp:home' %}" class="text-xl font-bold hover:underline">PLOOKJING</a>
       <nav class="space-x-4">
         <a href="{% url 'myapp:home' %}" class="hover:underline">หน้าหลัก</a>
-        <a href="/select-tree/" class="hover:underline">เลือกต้นไม้</a>
-        <a href="/planting-plan/" class="hover:underline">แผนการปลูก</a>
-        <a href="/equipment-shop/list/" class="hover:underline">ร้านอุปกรณ์</a>
-        <a href="/my-trees/" class="hover:underline">ต้นไม้ของฉัน</a>
-        <a href="/purchase-history/" class="hover:underline">ประวัติการสั่งซื้อ</a>
-        <a href="/notifications/" class="hover:underline">แจ้งเตือน</a>
-        <a href="/about/" class="hover:underline">เกี่ยวกับเรา</a>
+        <a href="{% url 'myapp:select_tree' %}" class="hover:underline">เลือกต้นไม้</a>
+        <a href="{% url 'myapp:planting_plan' %}" class="hover:underline">แผนการปลูก</a>
+        <a href="{% url 'myapp:equipment_list' %}" class="hover:underline">ร้านอุปกรณ์</a>
+        <a href="{% url 'myapp:my_trees' %}" class="hover:underline">ต้นไม้ของฉัน</a>
+        <a href="{% url 'myapp:purchase_history' %}" class="hover:underline">ประวัติการสั่งซื้อ</a>
+        <a href="{% url 'myapp:notifications' %}" class="hover:underline">แจ้งเตือน</a>
+        <a href="{% url 'myapp:about' %}" class="hover:underline">เกี่ยวกับเรา</a>
       </nav>
     </div>
   </header>
@@ -36,7 +36,7 @@
     <div class="container mx-auto text-center">
       <h2 class="text-3xl font-semibold text-green-800">TOP SALE</h2>
       <p class="text-gray-600 mt-2">ลด 20% สำหรับสมาชิก PLOOKJING</p>
-      <a href="/select-tree/" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-5 rounded-full">เริ่มปลูกเลย</a>
+      <a href="{% url 'myapp:select_tree' %}" class="mt-4 inline-block bg-green-500 hover:bg-green-600 text-white py-2 px-5 rounded-full">เริ่มปลูกเลย</a>
       <div class="mt-6 flex justify-center">
         <img src="https://i.postimg.cc/90ZX7pWx/tree-pot.png" alt="tree sale" class="w-72">
       </div>
@@ -67,12 +67,12 @@
       <div class="bg-green-100 p-6 rounded-lg shadow">
         <h3 class="text-lg font-bold text-green-800">ต้นไม้ขายดี</h3>
         <p class="text-sm text-gray-600 mb-2">เหมาะกับบ้านและที่ทำงาน</p>
-        <a href="/select-tree/" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
+        <a href="{% url 'myapp:select_tree' %}" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
       </div>
       <div class="bg-green-100 p-6 rounded-lg shadow">
         <h3 class="text-lg font-bold text-green-800">ต้นไม้เพื่อสุขภาพ</h3>
         <p class="text-sm text-gray-600 mb-2">ช่วยฟอกอากาศในบ้าน</p>
-        <a href="/select-tree/" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
+        <a href="{% url 'myapp:select_tree' %}" class="text-green-700 font-semibold hover:underline">เลือกต้นไม้</a>
       </div>
     </div>
   </section>
