@@ -40,11 +40,19 @@ def subscribe(request):
 def equipment_shop(request):
     return render(request, 'myapp/equipment_shop.html')
 
-def equipment_list(request):
-    return render(request, 'myapp/equipment_list.html')
+from .models import Equipment
 
-def equipment_detail(request):
-    return render(request, 'myapp/equipment_detail.html')
+def equipment_list(request):
+    query = request.GET.get('q')
+    if query:
+        equipment_list = Equipment.objects.filter(name__icontains=query)
+    else:
+        equipment_list = Equipment.objects.all()
+    return render(request, 'myapp/equipment_list.html', {'equipment_list': equipment_list})
+
+def equipment_detail(request, equipment_id):
+    equipment = get_object_or_404(Equipment, id=equipment_id)
+    return render(request, 'myapp/equipment_detail.html', {'equipment': equipment})
 
 def equipment_purchase(request):
     return render(request, 'myapp/purchase_equipment.html')

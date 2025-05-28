@@ -1,8 +1,43 @@
 {% extends 'base.html' %}
-{% block title %}Equipment Detail | PLOOKJING{% endblock %}
+{% block title %}{{ equipment.name }} | PLOOKJING{% endblock %}
+
 {% block content %}
-<div class="p-6">
-  <h2 class="text-2xl font-bold text-green-800 mb-4">Equipment Detail</h2>
-  <p class="text-gray-700">This is the Equipment Detail page.</p>
+<div class="max-w-6xl mx-auto p-6">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+    
+    <!-- 🛠 รูปภาพอุปกรณ์ -->
+    <div class="bg-white rounded-2xl shadow-lg p-4">
+      {% if equipment.image %}
+        <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}"
+             class="w-full h-96 object-cover rounded-xl border border-gray-200">
+      {% else %}
+        <div class="w-full h-96 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
+          ไม่มีรูปภาพ
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 📋 รายละเอียดอุปกรณ์ -->
+    <div class="space-y-6">
+      <h1 class="text-3xl font-bold text-green-800">{{ equipment.name }}</h1>
+      <p class="text-gray-700 leading-relaxed">{{ equipment.description|default:"ไม่มีคำอธิบายเพิ่มเติม" }}</p>
+      <p class="text-2xl font-bold text-orange-600">฿{{ equipment.price|floatformat:2 }}</p>
+
+      <!-- ปุ่ม -->
+      <div class="flex space-x-4">
+        <a href="{% url 'myapp:equipment_list' %}"
+           class="px-5 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-sm text-gray-800">
+          ← ย้อนกลับ
+        </a>
+        <a href="#" class="px-6 py-2 rounded-lg bg-green-600 hover:bg-green-700 text-white shadow">
+          เพิ่มไปยังตะกร้า
+        </a>
+        <a href="#" class="px-6 py-2 rounded-lg bg-orange-600 hover:bg-orange-700 text-white shadow">
+          สั่งซื้อตอนนี้
+        </a>
+      </div>
+    </div>
+
+  </div>
 </div>
 {% endblock %}

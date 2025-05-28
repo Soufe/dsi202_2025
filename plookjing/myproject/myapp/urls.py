@@ -17,8 +17,8 @@ urlpatterns = [
     path('planting-plan/', views.planting_plan, name='planting_plan'),
 
     # ร้านอุปกรณ์
-    path('equipment-shop/list/', views.equipment_list, name='equipment_list'),
-    path('equipment-shop/list/equipment-detail/', views.equipment_detail, name='equipment_detail'),
+    path('equipment-list/', views.equipment_list, name='equipment_list'),
+    path('equipment/<int:equipment_id>/', views.equipment_detail, name='equipment_detail'),
 
     # ต้นไม้ของฉัน
     path('my-trees/', views.my_trees, name='my_trees'),
