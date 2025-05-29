@@ -1,8 +1,9 @@
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
-from .models import Tree  # ✅ เพิ่ม: โหลดรายการต้นไม้จาก model Tree
+from .models import Tree, Equipment
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 # ✅ Home
 def home(request):
@@ -84,6 +85,131 @@ def purchase_history(request):
 
 def view_order(request):
     return render(request, 'myapp/view_order.html')
+
+
+
+
+
+
+@require_POST
+def add_to_cart(request, item_type, item_id):
+    quantity = int(request.POST.get('quantity', 1))
+    cart = request.session.get('cart', [])
+
+    for item in cart:
+        if item['id'] == item_id and item['type'] == item_type:
+            item['quantity'] += quantity
+            break
+    else:
+        cart.append({
+            'id': item_id,
+            'type': item_type,
+            'quantity': quantity,
+        })
+
+    request.session['cart'] = cart
+    return redirect('myapp:cart')
+
+@require_POST
+def buy_now(request, item_type, item_id):
+    quantity = int(request.POST.get('quantity', 1))
+    request.session['checkout_cart'] = [{
+        'id': item_id,
+        'type': item_type,
+        'quantity': quantity
+    }]
+    return redirect('myapp:payment')
+
+def cart_view(request):
+    cart = request.session.get('cart', [])
+    cart_tree_items = []
+    cart_equipment_items = []
+
+    for item in cart:
+        item_type = item.get('type')
+        item_id = item.get('id')
+        quantity = item.get('quantity', 1)
+
+        if item_type == 'tree':
+            try:
+                tree = Tree.objects.get(id=item_id)
+                cart_tree_items.append({
+                    'id': tree.id,
+                    'type': 'tree',
+                    'name': tree.name,
+                    'image': tree.image.url if tree.image else None,
+                    'price': tree.price,
+                    'quantity': quantity,
+                    'total': tree.price * quantity,
+                })
+            except Tree.DoesNotExist:
+                continue
+
+        elif item_type == 'equipment':
+            try:
+                equipment = Equipment.objects.get(id=item_id)
+                cart_equipment_items.append({
+                    'id': equipment.id,
+                    'type': 'equipment',
+                    'name': equipment.name,
+                    'image': equipment.image.url if equipment.image else None,
+                    'price': equipment.price,
+                    'quantity': quantity,
+                    'total': equipment.price * quantity,
+                })
+            except Equipment.DoesNotExist:
+                continue
+
+    return render(request, 'myapp/cart.html', {
+        'cart_tree_items': cart_tree_items,
+        'cart_equipment_items': cart_equipment_items,
+    })
+
+@require_POST
+def update_quantity(request, item_id):
+    action = request.POST.get('action')
+    cart = request.session.get('cart', [])
+
+    for item in cart:
+        if str(item.get('id')) == str(item_id):
+            if action == 'increase':
+                item['quantity'] += 1
+            elif action == 'decrease' and item['quantity'] > 1:
+                item['quantity'] -= 1
+            break
+
+    request.session['cart'] = cart
+    return redirect('myapp:cart')
+
+@require_POST
+def checkout_selected(request):
+    selected_ids = request.POST.getlist('selected_items')
+    cart = request.session.get('cart', [])
+    selected_items = [item for item in cart if str(item['id']) in selected_ids]
+    request.session['checkout_cart'] = selected_items
+    return redirect('myapp:payment')
+
+
+def tree_order(request, tree_id):
+    tree = get_object_or_404(Tree, pk=tree_id)
+
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+        province = request.POST.get('province')
+        
+        # ✅ จำลองการสร้างออเดอร์ → อนาคตอาจ save เข้า DB ได้
+        request.session['tree_order'] = {
+            'id': tree.id,
+            'name': tree.name,
+            'price': float(tree.price),
+            'quantity': quantity,
+            'province': province,
+        }
+        return redirect('myapp:payment')  # ไปหน้าชำระเงิน
+    return render(request, 'myapp/tree_order.html', {'tree': tree})
+
+
+
 
 # ✅ Signup (สามารถปิดการใช้งานได้หากไม่ใช้ระบบผู้ใช้)
 def signup(request):

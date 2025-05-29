@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}ยืนยันการปลูก {{ tree.name }}{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto p-6">
+  <h1 class="text-2xl font-bold text-green-800 mb-4">ยืนยันการปลูกต้นไม้</h1>
+
+  <div class="bg-white rounded-xl shadow-md p-6 space-y-6">
+    <div class="flex items-center space-x-4">
+      {% if tree.image %}
+        <img src="{{ tree.image.url }}" alt="{{ tree.name }}" class="w-32 h-32 object-cover rounded-md border">
+      {% endif %}
+      <div>
+        <h2 class="text-xl font-semibold">{{ tree.name }}</h2>
+        <p class="text-gray-600">฿{{ tree.price|floatformat:2 }}</p>
+      </div>
+    </div>
+
+    <form method="POST" class="space-y-4">
+      {% csrf_token %}
+      <div class="flex items-center space-x-3">
+        <label for="quantity">จำนวน:</label>
+        <input type="number" name="quantity" id="quantity" value="1" min="1"
+               class="w-20 px-3 py-1 border rounded-md text-center">
+      </div>
+
+      <div>
+        <label for="province" class="block mb-1 text-sm">จังหวัดที่ต้องการปลูก:</label>
+        <input type="text" name="province" id="province" required
+               class="w-full border rounded-md px-3 py-2 shadow-sm">
+      </div>
+
+      <button type="submit"
+              class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg shadow">
+        ยืนยันคำสั่งซื้อ
+      </button>
+    </form>
+  </div>
+</div>
+{% endblock %}

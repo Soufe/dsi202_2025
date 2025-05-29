@@ -6,6 +6,7 @@
   <title>{% block title %}PLOOKJING{% endblock %}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Prompt', sans-serif; }
@@ -28,30 +29,19 @@
         </ul>
       </div>
 
-      <!-- Right section: Profile Dropdown -->
-      <div class="relative group">
-        <img src="{% static 'media/user.svg' %}" alt="Profile"
-             class="w-8 h-8 rounded-full border hover:ring-2 cursor-pointer">
+      <!-- Right section: Profile + Cart -->
+<div class="flex items-center space-x-4">
+  <!-- 🛒 Cart -->
+  <a href="{% url 'myapp:cart' %}">
+    <img src="{% static 'images/basket.svg' %}" alt="Cart Icon" class="w-6 h-6 hover:opacity-80">
+  </a>
 
-        <div class="absolute right-0 mt-2 w-44 bg-white rounded-xl shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition duration-200 z-50">
-          <div class="px-4 py-2 text-sm text-gray-800 border-b">
-            {% if user.is_authenticated %}
-              สวัสดี, <strong>{{ user.username }}</strong>
-            {% else %}
-              ยินดีต้อนรับ
-            {% endif %}
-          </div>
-          <ul class="text-sm text-gray-700">
-            {% if user.is_authenticated %}
-              <li><a href="{% url 'myapp:user_profile' %}" class="block px-4 py-2 hover:bg-gray-100">โปรไฟล์ของฉัน</a></li>
-              <li><a href="{% url 'account_logout' %}" class="block px-4 py-2 hover:bg-gray-100 text-red-500">ออกจากระบบ</a></li>
-            {% else %}
-              <li><a href="{% url 'account_login' %}" class="block px-4 py-2 hover:bg-gray-100 text-green-700">เข้าสู่ระบบ</a></li>
-              <li><a href="{% url 'account_signup' %}" class="block px-4 py-2 hover:bg-gray-100 text-orange-600">สมัครสมาชิก</a></li>
-            {% endif %}
-          </ul>
-        </div>
-      </div>
+  <!-- 👤 Profile -->
+  <a href="{% url 'myapp:user_profile' %}">
+    <img src="{% static 'images/user.svg' %}" alt="Profile" class="w-8 h-8 rounded-full border hover:ring-2">
+  </a>
+</div>
+
     </div>
   </nav>
 
