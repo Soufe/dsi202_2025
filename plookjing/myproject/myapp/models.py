@@ -37,7 +37,7 @@ class Equipment(models.Model):
     def __str__(self):
         return self.name
 
-# -------------------- การสั่งซื้ออุปกรณ์ --------------------
+# -------------------- การสั่งซื้ออุปกรณ์ (เก่า - ยังใช้ได้ถ้าต้องแยก) --------------------
 class EquipmentOrder(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     equipment = models.ForeignKey(Equipment, on_delete=models.CASCADE)
@@ -77,3 +77,44 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"To {self.user.username}: {self.message}"
+
+# -------------------- การสั่งซื้อรวม (ต้นไม้ + อุปกรณ์) --------------------
+class Purchase(models.Model):
+    PRODUCT_TYPE_CHOICES = [
+        ('tree', 'Tree'),
+        ('equipment', 'Equipment'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product_type = models.CharField(max_length=20, choices=PRODUCT_TYPE_CHOICES)
+    product_id = models.PositiveIntegerField()
+    product_name = models.CharField(max_length=200)
+    image_url = models.URLField(blank=True)
+    quantity = models.PositiveIntegerField(default=1)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, default='pending')  # pending, verifying, preparing, shipping, delivered, cancelled
+    address = models.CharField(max_length=255, blank=True)
+    tel = models.CharField(max_length=20, blank=True)
+    payment_slip = models.ImageField(upload_to='slips/', blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.product_type} - {self.product_name} x {self.quantity}"
+
+class UserPlanting(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('planted', 'Planted'),
+        ('growing', 'Growing'),
+        ('completed', 'Completed'),
+    ]
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    tree = models.ForeignKey(Tree, on_delete=models.CASCADE)
+    location = models.CharField(max_length=255)
+    planted_date = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tree.name} ({self.status})"
+

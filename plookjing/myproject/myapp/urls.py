@@ -35,10 +35,12 @@ urlpatterns = [
 
     # 🛒 ตะกร้า
     path('cart/', views.cart_view, name='cart'),
-    path('cart/add/<str:item_type>/<int:item_id>/', views.add_to_cart, name='add_to_cart'),
-    path('cart/update/<int:item_id>/', views.update_quantity, name='update_quantity'),
-    path('cart/checkout-selected/', views.checkout_selected, name='checkout_selected'),
+    path('add-to-cart/<str:product_type>/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('buy-now/<str:product_type>/<int:product_id>/', views.buy_now, name='buy_now'),
+    path('update-cart/', views.update_cart, name='update_cart'),
+    path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('checkout/', views.checkout_selected, name='checkout_selected'),
 
-    # 💳 สั่งซื้อทันที
-    path('buy-now/<int:item_id>/', views.buy_now, name='buy_now'),
+    
+
 ]

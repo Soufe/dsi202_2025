@@ -18,7 +18,7 @@
 
   <!-- 🧰 Equipment Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-    {% for equipment in equipment_list %}
+    {% for equipment in equipments %}
       <a href="{% url 'myapp:equipment_detail' equipment.id %}" class="block bg-white rounded-xl shadow p-4 hover:shadow-lg transition hover:ring-2 hover:ring-green-500">
         {% if equipment.image %}
           <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" class="w-full h-48 object-cover rounded mb-3">

@@ -1,123 +1,70 @@
 {% extends 'base.html' %}
-{% load static %}
-
 {% block title %}ตะกร้าสินค้า | PLOOKJING{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto p-6">
-  <h1 class="text-3xl font-bold text-green-700 mb-6">🛒 ตะกร้าของคุณ</h1>
+<div class="max-w-5xl mx-auto p-6">
+  <h1 class="text-3xl font-bold text-green-700 mb-6">🛒 ตะกร้าสินค้า</h1>
 
-  <!-- หมวดหมู่: ต้นไม้ -->
-  <div class="mb-10">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold text-green-800">🌳 ต้นไม้</h2>
-      <label class="flex items-center space-x-2">
-        <input type="checkbox" id="select-all-trees" class="form-checkbox h-5 w-5 text-green-500">
-        <span class="text-sm text-gray-600">เลือกทั้งหมด (ต้นไม้)</span>
-      </label>
-    </div>
-    <div class="grid gap-4">
-      {% for item in cart.tree_items %}
-      <div class="bg-white rounded-xl shadow-md flex items-center p-4 space-x-4">
-        <input type="checkbox" name="selected_tree" value="{{ item.id }}" class="tree-checkbox h-5 w-5 text-green-500">
-        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-24 h-24 object-cover rounded-lg border">
-        <div class="flex-1">
-          <h3 class="text-lg font-medium text-green-700">{{ item.name }}</h3>
-          <p class="text-sm text-gray-600">ราคา: ฿{{ item.price|floatformat:2 }}</p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button class="bg-gray-200 px-2 py-1 rounded">−</button>
-          <span class="w-6 text-center">{{ item.quantity }}</span>
-          <button class="bg-gray-200 px-2 py-1 rounded">+</button>
-        </div>
-        <form method="post" action="{% url 'remove_from_cart' item.id %}">
-          {% csrf_token %}
-          <button type="submit" class="text-red-500 hover:underline">ลบ</button>
+  {% if cart %}
+    <div class="space-y-6">
+      {% for item in cart %}
+        <div class="flex items-center bg-white shadow rounded-xl p-4 gap-4">
+          <!-- รูปสินค้า -->
+          <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-24 h-24 object-cover rounded border">
+
+          <!-- รายละเอียด -->
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-green-800">{{ item.name }}</h2>
+            <p class="text-sm text-gray-500">ประเภท: {{ item.type|title }}</p>
+            <p class="text-sm text-orange-600 font-bold">฿{{ item.price|floatformat:2 }}</p>
+          </div>
+
+          <!-- ปรับจำนวน -->
+          <div class="flex items-center gap-2">
+            <form method="post" action="{% url 'update_cart' %}">
+              {% csrf_token %}
+              <input type="hidden" name="item_id" value="{{ forloop.counter0 }}">
+              <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                     class="w-16 text-center border rounded px-2 py-1">
+              <button type="submit" class="text-sm text-green-600 hover:underline">อัปเดต</button>
+            </form>
+          </div>
+
+          <!-- ปุ่มลบ -->
+          <form method="POST" action="{% url 'myapp:remove_from_cart' item.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="type" value="tree">  <!-- หรือ equipment -->
+            <button type="submit" class="text-red-500 hover:text-red-700">ลบ</button>
         </form>
-      </div>
-      {% empty %}
-      <p class="text-gray-500">ยังไม่มีต้นไม้ในตะกร้า</p>
+
+          <form method="POST" action="{% url 'myapp:update_cart' %}">
+            {% csrf_token %}
+            <input type="hidden" name="item_id" value="{{ item.id }}">
+            <input type="number" name="quantity" value="{{ item.quantity }}" min="1">
+            <button type="submit">อัปเดตจำนวน</button>
+        </form>
+        </div>
       {% endfor %}
     </div>
-  </div>
 
-  <!-- หมวดหมู่: อุปกรณ์ -->
-  <div class="mb-10">
-    <div class="flex justify-between items-center mb-4">
-      <h2 class="text-2xl font-semibold text-orange-700">🛠 อุปกรณ์</h2>
-      <label class="flex items-center space-x-2">
-        <input type="checkbox" id="select-all-equipment" class="form-checkbox h-5 w-5 text-orange-500">
-        <span class="text-sm text-gray-600">เลือกทั้งหมด (อุปกรณ์)</span>
-      </label>
-    </div>
-    <div class="grid gap-4">
-      {% for item in cart.equipment_items %}
-      <div class="bg-white rounded-xl shadow-md flex items-center p-4 space-x-4">
-        <input type="checkbox" name="selected_equipment" value="{{ item.id }}" class="equipment-checkbox h-5 w-5 text-orange-500">
-        <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-24 h-24 object-cover rounded-lg border">
-        <div class="flex-1">
-          <h3 class="text-lg font-medium text-orange-700">{{ item.name }}</h3>
-          <p class="text-sm text-gray-600">ราคา: ฿{{ item.price|floatformat:2 }}</p>
-        </div>
-        <div class="flex items-center space-x-2">
-          <button class="bg-gray-200 px-2 py-1 rounded">−</button>
-          <span class="w-6 text-center">{{ item.quantity }}</span>
-          <button class="bg-gray-200 px-2 py-1 rounded">+</button>
-        </div>
-        <form method="post" action="{% url 'remove_from_cart' item.id %}">
-          {% csrf_token %}
-          <button type="submit" class="text-red-500 hover:underline">ลบ</button>
-        </form>
+    <!-- สรุปยอดรวม -->
+    <div class="mt-8 bg-gray-50 p-6 rounded-xl shadow-inner flex justify-between items-center">
+      <div class="text-lg font-medium text-gray-700">
+        รวมทั้งหมด:
+        <span class="text-2xl font-bold text-orange-600">฿{{ total|floatformat:2 }}</span>
       </div>
-      {% empty %}
-      <p class="text-gray-500">ยังไม่มีอุปกรณ์ในตะกร้า</p>
-      {% endfor %}
+      <a href="{% url 'checkout_selected' %}"
+         class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold shadow">
+        ✅ ดำเนินการต่อ
+      </a>
     </div>
-  </div>
-
-  <!-- สรุปราคา -->
-  <div class="bg-gray-50 p-6 rounded-xl shadow-inner flex flex-col md:flex-row justify-between items-center">
-    <div class="text-lg text-gray-700">
-      ราคารวมเฉพาะที่เลือก:
-      <span id="total-selected" class="text-2xl font-bold text-green-700 ml-2">฿0.00</span>
+  {% else %}
+    <p class="text-gray-500 text-center text-lg mt-10">ยังไม่มีสินค้าในตะกร้า</p>
+    <div class="text-center mt-4">
+      <a href="{% url 'myapp:equipment_list' %}" class="text-green-600 hover:underline">
+        ← เลือกสินค้าเพิ่มเติม
+      </a>
     </div>
-    <form method="post" action="{% url 'checkout' %}" class="mt-4 md:mt-0">
-      {% csrf_token %}
-      <button type="submit" class="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-xl font-semibold">
-        ดำเนินการชำระเงิน
-      </button>
-    </form>
-  </div>
+  {% endif %}
 </div>
-
-<!-- ✅ JavaScript รวมยอดเฉพาะที่เลือก -->
-<script>
-  const treeCheckboxes = document.querySelectorAll('.tree-checkbox');
-  const equipmentCheckboxes = document.querySelectorAll('.equipment-checkbox');
-  const selectAllTrees = document.getElementById('select-all-trees');
-  const selectAllEquipment = document.getElementById('select-all-equipment');
-  const totalDisplay = document.getElementById('total-selected');
-
-  function updateTotal() {
-    let total = 0;
-    document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-      const item = cb.closest('div');
-      const priceText = item.querySelector('p').innerText.replace('ราคา: ฿', '');
-      const quantity = parseInt(item.querySelector('span').innerText.trim());
-      total += parseFloat(priceText) * quantity;
-    });
-    totalDisplay.textContent = '฿' + total.toFixed(2);
-  }
-
-  treeCheckboxes.forEach(cb => cb.addEventListener('change', updateTotal));
-  equipmentCheckboxes.forEach(cb => cb.addEventListener('change', updateTotal));
-  selectAllTrees.addEventListener('change', () => {
-    treeCheckboxes.forEach(cb => cb.checked = selectAllTrees.checked);
-    updateTotal();
-  });
-  selectAllEquipment.addEventListener('change', () => {
-    equipmentCheckboxes.forEach(cb => cb.checked = selectAllEquipment.checked);
-    updateTotal();
-  });
-</script>
 {% endblock %}
