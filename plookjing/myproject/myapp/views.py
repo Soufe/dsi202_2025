@@ -53,35 +53,17 @@ def equipment_list(request):
 
 
 # 🛒 เพิ่มสินค้าไปยังตะกร้า
-def add_to_cart(request, item_type, item_id):
+def add_to_cart(request, product_id):
     cart = request.session.get('cart', [])
-    item_id = int(item_id)
-    found = False
-
     for item in cart:
-        if item['type'] == item_type and int(item['id']) == item_id:
+        if item['id'] == product_id:
             item['quantity'] += 1
-            found = True
             break
-
-    if not found:
-        if item_type == 'tree':
-            obj = get_object_or_404(Tree, id=item_id)
-        elif item_type == 'equipment':
-            obj = get_object_or_404(Equipment, id=item_id)
-        else:
-            return redirect('myapp:home')
-
-        cart.append({
-            'type': item_type,
-            'id': obj.id,
-            'name': obj.name,
-            'price': getattr(obj, 'price', 0),
-            'quantity': 1,
-        })
-
+    else:
+        cart.append({'id': product_id, 'quantity': 1})
     request.session['cart'] = cart
-    return redirect('myapp:cart')
+    return redirect('cart')
+
 
 
 # 🛒 แสดงหน้าตะกร้าสินค้า
