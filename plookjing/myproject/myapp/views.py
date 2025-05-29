@@ -1,204 +1,40 @@
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
-from .models import Tree, Equipment
-from django.shortcuts import get_object_or_404
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
+from .models import Tree, Equipment
 
-# ✅ Home
+
+# 🏠 หน้าแรก
 def home(request):
     return render(request, 'myapp/home.html')
 
-# ✅ Select Tree (แสดงรายการต้นไม้)
+
+# 🌳 รายการต้นไม้
 def select_tree(request):
     query = request.GET.get('q')
-    if query:
-        trees = Tree.objects.filter(name__icontains=query)
-    else:
-        trees = Tree.objects.all()
+    trees = Tree.objects.filter(name__icontains=query) if query else Tree.objects.all()
     return render(request, 'myapp/select_tree.html', {'trees': trees})
 
-def choose_species(request):
-    return render(request, 'myapp/choose_species.html')
-
-def specify_location(request):
-    return render(request, 'myapp/specify_location.html')
-
-# ✅ Planting Plan
 def planting_plan(request):
     return render(request, 'myapp/planting_plan.html')
 
-def choose_plan(request):
-    return render(request, 'myapp/choose_plan.html')
 
-def set_quantity(request):
-    return render(request, 'myapp/set_quantity.html')
-
-def subscribe(request):
-    return render(request, 'myapp/subscribe.html')
-
-# ✅ Equipment Shop
-def equipment_shop(request):
-    return render(request, 'myapp/equipment_shop.html')
-
-from .models import Equipment
-
-def equipment_list(request):
-    query = request.GET.get('q')
-    if query:
-        equipment_list = Equipment.objects.filter(name__icontains=query)
-    else:
-        equipment_list = Equipment.objects.all()
-    return render(request, 'myapp/equipment_list.html', {'equipment_list': equipment_list})
-
-def equipment_detail(request, equipment_id):
-    equipment = get_object_or_404(Equipment, id=equipment_id)
-    return render(request, 'myapp/equipment_detail.html', {'equipment': equipment})
-
-def equipment_purchase(request):
-    return render(request, 'myapp/purchase_equipment.html')
-
-# ✅ Notifications
-def view_care_notifications(request):
-    return render(request, 'myapp/view_care_notifications.html')
-
-def notifications(request):
-    return render(request, 'view_notifications.html')
-
-# ✅ My Trees
-def my_trees(request):
-    return render(request, 'myapp/my_trees.html')
-
+# 🌳 รายละเอียดต้นไม้
 def tree_detail(request, tree_id):
     tree = get_object_or_404(Tree, pk=tree_id)
     return render(request, 'myapp/tree_detail.html', {'tree': tree})
 
-def growth_status(request):
-    return render(request, 'myapp/growth_status.html')
 
-def care_history(request):
-    return render(request, 'myapp/care_history.html')
-
-# ✅ Purchase History
-def purchase_history(request):
-    return render(request, 'myapp/purchase_history.html')
-
-def view_order(request):
-    return render(request, 'myapp/view_order.html')
-
-
-
-
-
-
-def add_to_cart(request, item_type, item_id):
-    cart = request.session.get('cart', [])
-
-    # เช็คว่ามี item นี้อยู่ในตะกร้าแล้วหรือยัง
-    found = False
-    for item in cart:
-        if item['type'] == item_type and item['id'] == item_id:
-            item['quantity'] += int(request.POST.get('quantity', 1))
-            found = True
-            break
-
-    if not found:
-        cart.append({
-            'type': item_type,
-            'id': item_id,
-            'quantity': int(request.POST.get('quantity', 1)),
-        })
-
-    request.session['cart'] = cart
-    return redirect('myapp:cart')
-
-
-@require_POST
-def buy_now(request, item_type, item_id):
-    quantity = int(request.POST.get('quantity', 1))
-    request.session['checkout_cart'] = [{
-        'id': item_id,
-        'type': item_type,
-        'quantity': quantity
-    }]
-    return redirect('myapp:payment')
-
-def cart_view(request):
-    cart = request.session.get('cart', [])
-
-    tree_dict = {}
-    equipment_dict = {}
-
-    for item in cart:
-        if item['type'] == 'tree':
-            key = (item['type'], item['id'])
-            if key not in tree_dict:
-                obj = Tree.objects.get(id=item['id'])
-                tree_dict[key] = {
-                    'id': obj.id,
-                    'name': obj.name,
-                    'image': obj.image,
-                    'price': obj.price,
-                    'quantity': item['quantity']
-                }
-            else:
-                tree_dict[key]['quantity'] += item['quantity']
-
-        elif item['type'] == 'equipment':
-            key = (item['type'], item['id'])
-            if key not in equipment_dict:
-                obj = Equipment.objects.get(id=item['id'])
-                equipment_dict[key] = {
-                    'id': obj.id,
-                    'name': obj.name,
-                    'image': obj.image,
-                    'price': obj.price,
-                    'quantity': item['quantity']
-                }
-            else:
-                equipment_dict[key]['quantity'] += item['quantity']
-
-    context = {
-        'tree_items': list(tree_dict.values()),
-        'equipment_items': list(equipment_dict.values()),
-    }
-
-    return render(request, 'cart.html', context)
-
-
-@require_POST
-def update_quantity(request, item_id):
-    action = request.POST.get('action')
-    cart = request.session.get('cart', [])
-
-    for item in cart:
-        if str(item.get('id')) == str(item_id):
-            if action == 'increase':
-                item['quantity'] += 1
-            elif action == 'decrease' and item['quantity'] > 1:
-                item['quantity'] -= 1
-            break
-
-    request.session['cart'] = cart
-    return redirect('myapp:cart')
-
-@require_POST
-def checkout_selected(request):
-    selected_ids = request.POST.getlist('selected_items')
-    cart = request.session.get('cart', [])
-    selected_items = [item for item in cart if str(item['id']) in selected_ids]
-    request.session['checkout_cart'] = selected_items
-    return redirect('myapp:payment')
-
-
+# 🧾 เลือกจังหวัดและจำนวนสำหรับต้นไม้ (ชำระเงินทันที)
 def tree_order(request, tree_id):
     tree = get_object_or_404(Tree, pk=tree_id)
 
     if request.method == 'POST':
         quantity = int(request.POST.get('quantity', 1))
-        province = request.POST.get('province')
-        
-        # ✅ จำลองการสร้างออเดอร์ → อนาคตอาจ save เข้า DB ได้
+        province = request.POST.get('province', '')
+
         request.session['tree_order'] = {
             'id': tree.id,
             'name': tree.name,
@@ -206,29 +42,116 @@ def tree_order(request, tree_id):
             'quantity': quantity,
             'province': province,
         }
-        return redirect('myapp:payment')  # ไปหน้าชำระเงิน
+        return redirect('myapp:payment')  # 🔁 เปลี่ยนเป็นหน้าชำระเงินจริงที่คุณใช้
+
     return render(request, 'myapp/tree_order.html', {'tree': tree})
 
+def equipment_list(request):
+    query = request.GET.get('q')
+    equipments = Equipment.objects.filter(name__icontains=query) if query else Equipment.objects.all()
+    return render(request, 'myapp/equipment_list.html', {'equipments': equipments})
 
 
+# 🛒 เพิ่มสินค้าไปยังตะกร้า
+def add_to_cart(request, item_type, item_id):
+    cart = request.session.get('cart', [])
+    item_id = int(item_id)
+    found = False
 
-# ✅ Signup (สามารถปิดการใช้งานได้หากไม่ใช้ระบบผู้ใช้)
+    for item in cart:
+        if item['type'] == item_type and int(item['id']) == item_id:
+            item['quantity'] += 1
+            found = True
+            break
+
+    if not found:
+        if item_type == 'tree':
+            obj = get_object_or_404(Tree, id=item_id)
+        elif item_type == 'equipment':
+            obj = get_object_or_404(Equipment, id=item_id)
+        else:
+            return redirect('myapp:home')
+
+        cart.append({
+            'type': item_type,
+            'id': obj.id,
+            'name': obj.name,
+            'price': getattr(obj, 'price', 0),
+            'quantity': 1,
+        })
+
+    request.session['cart'] = cart
+    return redirect('myapp:cart')
+
+
+# 🛒 แสดงหน้าตะกร้าสินค้า
+def cart_view(request):
+    cart = request.session.get('cart', [])
+    tree_items = []
+    equipment_items = []
+
+    for item in cart:
+        if item['type'] == 'tree':
+            try:
+                tree = Tree.objects.get(id=item['id'])
+                tree_items.append({
+                    'id': tree.id,
+                    'name': tree.name,
+                    'image': tree.image,
+                    'quantity': item['quantity'],
+                    'price': getattr(tree, 'price', 0),
+                })
+            except Tree.DoesNotExist:
+                pass
+        elif item['type'] == 'equipment':
+            try:
+                equipment = Equipment.objects.get(id=item['id'])
+                equipment_items.append({
+                    'id': equipment.id,
+                    'name': equipment.name,
+                    'image': equipment.image,
+                    'quantity': item['quantity'],
+                    'price': getattr(equipment, 'price', 0),
+                })
+            except Equipment.DoesNotExist:
+                pass
+
+    context = {
+        'tree_items': tree_items,
+        'equipment_items': equipment_items,
+    }
+    return render(request, 'myapp/cart.html', context)
+
+
+# ❌ ลบรายการออกจากตะกร้า
+@require_POST
+def update_quantity(request, item_id):
+    cart = request.session.get('cart', [])
+    item_id = int(item_id)
+    cart = [item for item in cart if int(item['id']) != item_id]
+    request.session['cart'] = cart
+    return redirect('myapp:cart')
+
+
+# 👤 สมัครสมาชิก
 def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect('home')
+            return redirect('myapp:home')
     else:
         form = UserCreationForm()
     return render(request, 'myapp/signup.html', {'form': form})
 
-# ✅ About
+
+# 📖 เกี่ยวกับเรา
 def about(request):
     return render(request, 'myapp/about.html')
 
+
+# 👤 โปรไฟล์ผู้ใช้
 @login_required
 def user_profile(request):
-    user = request.user
-    return render(request, 'myapp/user_profile.html', {'user': user})
+    return render(request, 'myapp/user_profile.html', {'user': request.user})

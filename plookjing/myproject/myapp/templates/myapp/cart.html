@@ -1,87 +1,105 @@
 {% extends 'base.html' %}
 {% load static %}
+
 {% block title %}ตะกร้าสินค้า | PLOOKJING{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto p-6 space-y-10">
-  <h1 class="text-3xl font-bold text-green-800 mb-6">ตะกร้าของคุณ</h1>
+<div class="max-w-6xl mx-auto p-6 space-y-10">
+  <h1 class="text-3xl font-bold text-green-800 mb-6">🛒 ตะกร้าของคุณ</h1>
 
-  <!-- 🌳 ต้นไม้ -->
-  <div>
-    <h2 class="text-xl font-semibold text-green-700 mb-3">ต้นไม้</h2>
-    {% if tree_items %}
-      <div class="space-y-4">
-        {% for item in tree_items %}
-          <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
-            <div class="flex items-center gap-4">
-              {% if item.image %}
-                <img src="{{ item.image.url }}" alt="{{ item.name }}"
-                     class="w-20 h-20 object-cover rounded-lg border">
-              {% else %}
-                <div class="w-20 h-20 bg-gray-100 text-gray-400 flex items-center justify-center rounded-lg">
-                  ไม่มีรูป
-                </div>
-              {% endif %}
-              <div>
-                <p class="font-semibold text-gray-800">{{ item.name }}</p>
-                <p class="text-sm text-gray-500">จำนวน: {{ item.quantity }}</p>
-                <p class="text-orange-600 font-bold">฿{{ item.price|floatformat:2 }}</p>
-              </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              <a href="{% url 'myapp:tree_order' item.id %}"
-                 class="px-4 py-2 text-sm bg-red-500 text-white rounded hover:bg-red-600 shadow">
-                สั่งซื้อตอนนี้
-              </a>
-              <form method="POST" action="{% url 'myapp:update_quantity' item.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="remove">
-                <button type="submit" class="text-xs text-red-400 hover:text-red-600">ลบ</button>
-              </form>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <p class="text-gray-500">ไม่มีต้นไม้ในตะกร้า</p>
-    {% endif %}
-  </div>
+  <form method="POST" action="{% url 'myapp:checkout_selected' %}" id="cart-form">
+    {% csrf_token %}
 
-  <!-- 🛠 อุปกรณ์ -->
-  <div>
-    <h2 class="text-xl font-semibold text-green-700 mb-3">อุปกรณ์</h2>
-    {% if equipment_items %}
-      <div class="space-y-4">
-        {% for item in equipment_items %}
-          <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
-            <div class="flex items-center gap-4">
-              {% if item.image %}
-                <img src="{{ item.image.url }}" alt="{{ item.name }}"
-                     class="w-20 h-20 object-cover rounded-lg border">
-              {% else %}
-                <div class="w-20 h-20 bg-gray-100 text-gray-400 flex items-center justify-center rounded-lg">
-                  ไม่มีรูป
+    {% for category, items in [('ต้นไม้', tree_items), ('อุปกรณ์', equipment_items)] %}
+      <div>
+        <h2 class="text-xl font-semibold text-green-700 mb-3">{{ category }}</h2>
+        {% if items %}
+          <div class="space-y-4">
+            {% for item in items %}
+              <div class="flex items-center justify-between bg-white p-4 rounded-xl shadow">
+                <div class="flex items-center gap-4">
+                  <input type="checkbox" name="selected_items" value="{{ item.id }}" class="form-checkbox mt-1 text-green-600 item-checkbox">
+                  {% if item.image %}
+                    <img src="{{ item.image.url }}" alt="{{ item.name }}" class="w-20 h-20 object-cover rounded-lg border">
+                  {% else %}
+                    <div class="w-20 h-20 bg-gray-100 text-gray-400 flex items-center justify-center rounded-lg">ไม่มีรูป</div>
+                  {% endif %}
+                  <div>
+                    <p class="font-semibold text-gray-800">{{ item.name }}</p>
+                    <p class="text-orange-600 font-bold">฿{{ item.price|floatformat:2 }}</p>
+                    <div class="flex items-center mt-1 space-x-2">
+                      <button type="button" class="qty-btn px-2 bg-gray-200 rounded" data-action="decrease" data-id="{{ item.id }}">−</button>
+                      <span class="quantity font-medium" id="qty-{{ item.id }}">{{ item.quantity }}</span>
+                      <button type="button" class="qty-btn px-2 bg-gray-200 rounded" data-action="increase" data-id="{{ item.id }}">+</button>
+                    </div>
+                  </div>
                 </div>
-              {% endif %}
-              <div>
-                <p class="font-semibold text-gray-800">{{ item.name }}</p>
-                <p class="text-sm text-gray-500">จำนวน: {{ item.quantity }}</p>
-                <p class="text-orange-600 font-bold">฿{{ item.price|floatformat:2 }}</p>
+                <div class="flex flex-col items-end gap-2">
+                  {% if category == 'ต้นไม้' %}
+                    <a href="{% url 'myapp:tree_order' item.id %}" class="px-4 py-2 text-sm bg-green-600 text-white rounded hover:bg-green-700 shadow">สั่งซื้อตอนนี้</a>
+                  {% endif %}
+                  <form method="POST" action="{% url 'myapp:update_quantity' item.id %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="remove">
+                    <button type="submit" class="text-xs text-red-400 hover:text-red-600">ลบ</button>
+                  </form>
+                </div>
               </div>
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              <form method="POST" action="{% url 'myapp:update_quantity' item.id %}">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="remove">
-                <button type="submit" class="text-xs text-red-400 hover:text-red-600">ลบ</button>
-              </form>
-            </div>
+            {% endfor %}
           </div>
-        {% endfor %}
+        {% else %}
+          <p class="text-gray-500">ไม่มี{{ category|lower }}ในตะกร้า</p>
+        {% endif %}
       </div>
-    {% else %}
-      <p class="text-gray-500">ไม่มีอุปกรณ์ในตะกร้า</p>
-    {% endif %}
-  </div>
+    {% endfor %}
+
+    <!-- ✅ รวมยอด + ปุ่มชำระเงิน -->
+    <div class="flex justify-between items-center mt-10 bg-gray-100 p-4 rounded-lg">
+      <p class="text-xl font-bold text-green-800">ยอดรวมที่เลือก: ฿<span id="total">0.00</span></p>
+      <button type="submit" class="px-6 py-3 bg-orange-500 hover:bg-orange-600 text-white rounded-lg font-semibold shadow">
+        🧾 ไปชำระเงินเฉพาะที่เลือก
+      </button>
+    </div>
+  </form>
 </div>
+
+<script>
+  // ✅ รวมยอดรวมเฉพาะที่เลือก
+  const checkboxes = document.querySelectorAll('.item-checkbox');
+  const totalEl = document.getElementById('total');
+  const prices = {};
+  {% for item in tree_items %}
+    prices[{{ item.id }}] = {{ item.price }};
+  {% endfor %}
+  {% for item in equipment_items %}
+    prices[{{ item.id }}] = {{ item.price }};
+  {% endfor %}
+
+  function updateTotal() {
+    let total = 0;
+    checkboxes.forEach(chk => {
+      if (chk.checked) {
+        const id = chk.value;
+        const qty = document.getElementById('qty-' + id).textContent;
+        total += prices[id] * parseInt(qty);
+      }
+    });
+    totalEl.textContent = total.toFixed(2);
+  }
+
+  checkboxes.forEach(chk => chk.addEventListener('change', updateTotal));
+
+  // ✅ ปุ่ม + -
+  document.querySelectorAll('.qty-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset.id;
+      const action = btn.dataset.action;
+      const qtyEl = document.getElementById('qty-' + id);
+      let qty = parseInt(qtyEl.textContent);
+      qty = (action === 'increase') ? qty + 1 : Math.max(1, qty - 1);
+      qtyEl.textContent = qty;
+      updateTotal();
+    });
+  });
+</script>
 {% endblock %}
