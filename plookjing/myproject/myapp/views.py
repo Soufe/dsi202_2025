@@ -91,23 +91,19 @@ def view_order(request):
 
 
 
-@require_POST
 def add_to_cart(request, item_type, item_id):
-    quantity = int(request.POST.get('quantity', 1))
-    cart = request.session.get('cart', [])
+    if request.method == 'POST':
+        quantity = int(request.POST.get('quantity', 1))
+        cart = request.session.get('cart', [])
 
-    for item in cart:
-        if item['id'] == item_id and item['type'] == item_type:
-            item['quantity'] += quantity
-            break
-    else:
+        # เพิ่มรายการใหม่
         cart.append({
-            'id': item_id,
             'type': item_type,
-            'quantity': quantity,
+            'id': item_id,
+            'quantity': quantity
         })
+        request.session['cart'] = cart
 
-    request.session['cart'] = cart
     return redirect('myapp:cart')
 
 @require_POST
@@ -122,48 +118,38 @@ def buy_now(request, item_type, item_id):
 
 def cart_view(request):
     cart = request.session.get('cart', [])
-    cart_tree_items = []
-    cart_equipment_items = []
+
+    tree_items = []
+    equipment_items = []
 
     for item in cart:
-        item_type = item.get('type')
-        item_id = item.get('id')
-        quantity = item.get('quantity', 1)
-
-        if item_type == 'tree':
-            try:
-                tree = Tree.objects.get(id=item_id)
-                cart_tree_items.append({
+        if item['type'] == 'tree':
+            tree = Tree.objects.filter(id=item['id']).first()
+            if tree:
+                tree_items.append({
                     'id': tree.id,
-                    'type': 'tree',
                     'name': tree.name,
-                    'image': tree.image.url if tree.image else None,
                     'price': tree.price,
-                    'quantity': quantity,
-                    'total': tree.price * quantity,
+                    'image': tree.image,
+                    'quantity': item['quantity'],
                 })
-            except Tree.DoesNotExist:
-                continue
-
-        elif item_type == 'equipment':
-            try:
-                equipment = Equipment.objects.get(id=item_id)
-                cart_equipment_items.append({
-                    'id': equipment.id,
-                    'type': 'equipment',
-                    'name': equipment.name,
-                    'image': equipment.image.url if equipment.image else None,
-                    'price': equipment.price,
-                    'quantity': quantity,
-                    'total': equipment.price * quantity,
+        elif item['type'] == 'equipment':
+            eq = Equipment.objects.filter(id=item['id']).first()
+            if eq:
+                equipment_items.append({
+                    'id': eq.id,
+                    'name': eq.name,
+                    'price': eq.price,
+                    'image': eq.image,
+                    'quantity': item['quantity'],
                 })
-            except Equipment.DoesNotExist:
-                continue
 
-    return render(request, 'myapp/cart.html', {
-        'cart_tree_items': cart_tree_items,
-        'cart_equipment_items': cart_equipment_items,
-    })
+    context = {
+        'tree_items': tree_items,
+        'equipment_items': equipment_items,
+    }
+    return render(request, 'cart.html', context)
+
 
 @require_POST
 def update_quantity(request, item_id):
