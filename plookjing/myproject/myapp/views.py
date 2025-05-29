@@ -92,19 +92,26 @@ def view_order(request):
 
 
 def add_to_cart(request, item_type, item_id):
-    if request.method == 'POST':
-        quantity = int(request.POST.get('quantity', 1))
-        cart = request.session.get('cart', [])
+    cart = request.session.get('cart', [])
 
-        # เพิ่มรายการใหม่
+    # เช็คว่ามี item นี้อยู่ในตะกร้าแล้วหรือยัง
+    found = False
+    for item in cart:
+        if item['type'] == item_type and item['id'] == item_id:
+            item['quantity'] += int(request.POST.get('quantity', 1))
+            found = True
+            break
+
+    if not found:
         cart.append({
             'type': item_type,
             'id': item_id,
-            'quantity': quantity
+            'quantity': int(request.POST.get('quantity', 1)),
         })
-        request.session['cart'] = cart
 
+    request.session['cart'] = cart
     return redirect('myapp:cart')
+
 
 @require_POST
 def buy_now(request, item_type, item_id):
@@ -119,35 +126,43 @@ def buy_now(request, item_type, item_id):
 def cart_view(request):
     cart = request.session.get('cart', [])
 
-    tree_items = []
-    equipment_items = []
+    tree_dict = {}
+    equipment_dict = {}
 
     for item in cart:
         if item['type'] == 'tree':
-            tree = Tree.objects.filter(id=item['id']).first()
-            if tree:
-                tree_items.append({
-                    'id': tree.id,
-                    'name': tree.name,
-                    'price': tree.price,
-                    'image': tree.image,
-                    'quantity': item['quantity'],
-                })
+            key = (item['type'], item['id'])
+            if key not in tree_dict:
+                obj = Tree.objects.get(id=item['id'])
+                tree_dict[key] = {
+                    'id': obj.id,
+                    'name': obj.name,
+                    'image': obj.image,
+                    'price': obj.price,
+                    'quantity': item['quantity']
+                }
+            else:
+                tree_dict[key]['quantity'] += item['quantity']
+
         elif item['type'] == 'equipment':
-            eq = Equipment.objects.filter(id=item['id']).first()
-            if eq:
-                equipment_items.append({
-                    'id': eq.id,
-                    'name': eq.name,
-                    'price': eq.price,
-                    'image': eq.image,
-                    'quantity': item['quantity'],
-                })
+            key = (item['type'], item['id'])
+            if key not in equipment_dict:
+                obj = Equipment.objects.get(id=item['id'])
+                equipment_dict[key] = {
+                    'id': obj.id,
+                    'name': obj.name,
+                    'image': obj.image,
+                    'price': obj.price,
+                    'quantity': item['quantity']
+                }
+            else:
+                equipment_dict[key]['quantity'] += item['quantity']
 
     context = {
-        'tree_items': tree_items,
-        'equipment_items': equipment_items,
+        'tree_items': list(tree_dict.values()),
+        'equipment_items': list(equipment_dict.values()),
     }
+
     return render(request, 'cart.html', context)
 
 
