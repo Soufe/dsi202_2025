@@ -330,30 +330,22 @@ def payment_tree(request):
 def upload_slip_tree(request):
     if request.method == 'POST' and request.FILES.get('slip'):
         slip = request.FILES['slip']
-        # TODO: บันทึก slip ลง model หรือ session
+        # บันทึกสลิปไว้กับคำสั่งซื้อ หรือ session (ตามระบบของคุณ)
+        # เช่น save_slip_to_order(request.user, slip)
 
-        return redirect('myapp:my_trees') 
-    return redirect('myapp:tree_list')  # fallback ถ้าไม่ใช่ POST
+        return redirect('myapp:my_trees')  # ✅ เชื่อมไปหน้า my_trees หลัง upload
+    return redirect('myapp:tree_list')
 
 
 # 🌱 ต้นไม้ของฉัน
 @login_required
 def my_trees(request):
-    status_choices = ['ทั้งหมด', 'กำลังปลูก', 'ปลูกแล้ว', 'ยกเลิก']
-    selected_status = request.GET.get('status')
-
-    tree_orders = UserPlanting.objects.filter(user=request.user)
-
-    if selected_status and selected_status != 'ทั้งหมด':
-        tree_orders = tree_orders.filter(status=selected_status)
-
-    context = {
-        'trees': tree_orders,
-        'status_choices': status_choices,
-        'selected_status': selected_status,
-    }
-    return render(request, 'myapp/my_trees.html', context)
-
+    plantings = UserPlanting.objects.filter(user=request.user).order_by('-created_at')  # หรือชื่อ model ที่คุณใช้
+    return render(request, 'myapp/my_trees.html', {
+        'plantings': plantings,
+        'status_choices': ['ทั้งหมด', 'รอปลูก', 'กำลังปลูก', 'ปลูกเสร็จแล้ว'],
+        'selected_status': request.GET.get('status', 'ทั้งหมด'),
+    })
 
 
 

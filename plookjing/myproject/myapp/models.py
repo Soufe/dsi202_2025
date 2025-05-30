@@ -118,8 +118,10 @@ class UserPlanting(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tree = models.ForeignKey(Tree, on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
+    quantity = models.PositiveIntegerField(default=1)
     planted_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.tree.name} ({self.status})"
