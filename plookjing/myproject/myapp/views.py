@@ -12,6 +12,8 @@ from .promptpay_qr import create_promptpay_qr_base64
 import qrcode
 import io
 import base64
+from collections import defaultdict
+
 
 # 🏠 หน้าแรก
 def home(request):
@@ -298,21 +300,18 @@ def payment_tree(request):
 
     for item in cart:
         if item.get('type') == 'tree':
-            try:
-                tree = Tree.objects.get(id=item['id'])
-                quantity = int(item.get('quantity', 1))
-                price = float(item.get('price', tree.price))
-                total_price = price * quantity
-                tree_cart.append({
-                    'id': tree.id,
-                    'name': tree.name,
-                    'image_url': tree.image.url if tree.image else '',
-                    'quantity': quantity,
-                    'price': price,
-                    'total_price': total_price,
-                })
-            except Tree.DoesNotExist:
-                continue
+            tree = get_object_or_404(Tree, id=item['id'])
+            quantity = int(item.get('quantity', 1))
+            price = float(tree.price)
+            total_price = price * quantity
+            tree_cart.append({
+                'id': tree.id,
+                'name': tree.name,
+                'image_url': tree.image.url if tree.image else '',
+                'quantity': quantity,
+                'price': price,
+                'total_price': total_price,
+            })
 
     total = sum(item['total_price'] for item in tree_cart)
     now = datetime.now()
@@ -326,25 +325,110 @@ def payment_tree(request):
         'order_date': now.strftime('%Y-%m-%d %H:%M'),
     })
 
+
 @login_required
 def upload_slip_tree(request):
     if request.method == 'POST' and request.FILES.get('slip'):
         slip = request.FILES['slip']
-        # บันทึกสลิปไว้กับคำสั่งซื้อ หรือ session (ตามระบบของคุณ)
-        # เช่น save_slip_to_order(request.user, slip)
+        cart = request.session.get('cart', [])
 
-        return redirect('myapp:my_trees')  # ✅ เชื่อมไปหน้า my_trees หลัง upload
-    return redirect('myapp:tree_list')
+        # ✅ Loop สร้าง UserPlanting สำหรับแต่ละต้นไม้ในตะกร้า
+        for item in cart:
+            if item['type'] == 'tree':
+                tree = get_object_or_404(Tree, id=item['id'])
+                quantity = int(item.get('quantity', 1))
+
+                for _ in range(quantity):
+                    UserPlanting.objects.create(
+                        user=request.user,
+                        tree=tree,
+                        location="ยังไม่ได้เลือก",  # แก้ภายหลัง
+                        planted_date=date.today(),
+                        status='pending',
+                    )
+
+        # ✅ ลบ tree จาก cart หลังจ่ายเงิน
+        request.session['cart'] = [item for item in cart if item['type'] != 'tree']
+        request.session.modified = True
+
+        return redirect('myapp:my_trees')
+
+    return redirect('home')  # fallback ถ้าไม่ใช่ POST
 
 
-# 🌱 ต้นไม้ของฉัน
+
+
+def confirm_tree_payment(request):
+    if request.method == 'POST':
+        user = request.user
+        cart = request.session.get('checkout_cart', [])
+        tree_location = request.session.get('tree_location')  # สมมติคุณเก็บไว้แบบนี้
+
+        for item in cart:
+            if item['type'] == 'tree':
+                tree_id = item['id']
+                quantity = item.get('quantity', 1)
+                tree = Tree.objects.get(id=tree_id)
+
+                for _ in range(quantity):
+                    UserPlanting.objects.create(
+                        user=user,
+                        tree=tree,
+                        location=tree_location,
+                        status='pending'  # สถานะเริ่มต้น
+                    )
+
+        # ✅ ลบเฉพาะ tree ออกจาก cart
+        request.session['cart'] = [item for item in cart if item['type'] != 'tree']
+        request.session.modified = True
+
+        return redirect('my_trees')  # ส่งไปหน้าต้นไม้ของฉัน
+
+
 @login_required
 def my_trees(request):
-    plantings = UserPlanting.objects.filter(user=request.user).order_by('-created_at')  # หรือชื่อ model ที่คุณใช้
+    plantings = UserPlanting.objects.filter(user=request.user)
+
+    # ✅ แปลงสถานะให้แสดงชื่อไทย
+    STATUS_DISPLAY = {
+        'pending': 'รอดำเนินการ',
+        'planted': 'ปลูกแล้ว',
+        'growing': 'กำลังเติบโต',
+        'completed': 'ปลูกเสร็จสิ้น',
+    }
+
+    # ✅ รวมรายการที่ซ้ำกันตาม tree + status
+    grouped = defaultdict(lambda: {
+        'quantity': 0,
+        'locations': set(),
+        'planted_date': None,
+        'tree': None,
+        'status': None
+    })
+
+    for p in plantings:
+        key = (p.tree.id, p.status)
+        grouped[key]['quantity'] += getattr(p, 'quantity', 1)
+        grouped[key]['locations'].add(p.location)
+        grouped[key]['planted_date'] = p.planted_date
+        grouped[key]['tree'] = p.tree
+        grouped[key]['status'] = p.status
+
+    # ✅ แปลงให้อยู่ในรูปแบบที่ template ใช้งานได้
+    grouped_plantings = [{
+        'tree': v['tree'],
+        'status': v['status'],
+        'status_display': STATUS_DISPLAY.get(v['status'], v['status']),
+        'quantity': v['quantity'],
+        'location': ", ".join(v['locations']),
+        'planted_date': v['planted_date']
+    } for v in grouped.values()]
+
+    # ✅ เรียงตามวันที่ปลูกใหม่ล่าสุด
+    grouped_plantings.sort(key=lambda x: x['planted_date'], reverse=True)
+
     return render(request, 'myapp/my_trees.html', {
-        'plantings': plantings,
-        'status_choices': ['ทั้งหมด', 'รอปลูก', 'กำลังปลูก', 'ปลูกเสร็จแล้ว'],
-        'selected_status': request.GET.get('status', 'ทั้งหมด'),
+        'plantings': grouped_plantings,
     })
 
 

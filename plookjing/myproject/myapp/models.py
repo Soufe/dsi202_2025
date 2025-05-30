@@ -122,6 +122,7 @@ class UserPlanting(models.Model):
     planted_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     created_at = models.DateTimeField(auto_now_add=True)
+    slip_url = models.FileField(upload_to='slips/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.tree.name} ({self.status})"

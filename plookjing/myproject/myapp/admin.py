@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Tree, PlantingPlan, Equipment, EquipmentOrder,
-    UserTree, TreeCare, Notification
+    UserTree, TreeCare, Notification, UserPlanting
 )
 
 @admin.register(Tree)
@@ -43,3 +43,9 @@ class NotificationAdmin(admin.ModelAdmin):
     list_filter = ('is_read',)
     search_fields = ('user__username', 'message')
 
+@admin.register(UserPlanting)
+class UserPlantingAdmin(admin.ModelAdmin):
+    list_display = ('user', 'tree', 'location', 'status', 'planted_date', 'created_at')
+    list_filter = ('status', 'planted_date', 'created_at')
+    search_fields = ('user__username', 'tree__name', 'location')
+    ordering = ('-created_at',)
