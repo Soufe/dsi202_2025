@@ -335,6 +335,7 @@ def upload_slip_tree(request):
         return redirect('myapp:my_trees') 
     return redirect('myapp:tree_list')  # fallback ถ้าไม่ใช่ POST
 
+
 # 🌱 ต้นไม้ของฉัน
 @login_required
 def my_trees(request):
