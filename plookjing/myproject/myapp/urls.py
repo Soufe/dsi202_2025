@@ -45,7 +45,7 @@ urlpatterns = [
     path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout_selected, name='checkout_selected'),
 
-    # ✅ ใช้ payment แทน confirm_cart_order
-    path('payment/', views.payment, name='payment'),
+    path('tree/payment/', views.payment_tree, name='payment_tree'),
+    path('equipment/payment/', views.payment_equipment, name='payment_equipment'),
 
 ]

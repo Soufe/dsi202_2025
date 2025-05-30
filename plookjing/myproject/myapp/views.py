@@ -4,6 +4,12 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .models import Tree, Equipment, Notification, Purchase, UserPlanting
+import stripe
+from django.conf import settings
+from .promptpay_qr import generate_promptpay_qr_payload
+import qrcode
+import io
+import base64
 
 # 🏠 หน้าแรก
 def home(request):
@@ -284,18 +290,49 @@ def equipment_order(request):
     })
 
 
+
+from django.shortcuts import render
+from datetime import datetime
+
 @login_required
-def payment(request):
-    if request.method == 'POST':
-        name = request.POST.get('name')
-        tel = request.POST.get('tel')
-        address = request.POST.get('address')
+def payment_tree(request):
+    tree_cart = [item for item in request.session.get('checkout_cart', []) if item['type'] == 'tree']
+    total = sum(item['price'] * item['quantity'] for item in tree_cart)
+    qr_base64 = create_promptpay_qr_base64("0922894514", total)
+    now = datetime.now()
 
-        request.session['order_info'] = {
-            'name': name,
-            'tel': tel,
-            'address': address,
-        }
+    return render(request, 'myapp/payment_tree.html', {
+        'items': tree_cart,
+        'total': total,
+        'qr_base64': qr_base64,
+        'order_date': now.strftime("%Y-%m-%d %H:%M"),
+        'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}"
+    })
 
-        return redirect('myapp:payment')
+
+@login_required
+def payment_equipment(request):
+    equipment_cart = [item for item in request.session.get('checkout_cart', []) if item['type'] == 'equipment']
+    total = sum(item['price'] * item['quantity'] for item in equipment_cart)
+    qr_base64 = create_promptpay_qr_base64("0922894514", total)
+    now = datetime.now()
+
+    return render(request, 'myapp/payment_equipment.html', {
+        'items': equipment_cart,
+        'total': total,
+        'qr_base64': qr_base64,
+        'order_date': now.strftime("%Y-%m-%d %H:%M"),
+        'order_id': f"EQUIP{now.strftime('%Y%m%d%H%M%S')}"
+    })
+
+
+
+def create_promptpay_qr_base64(mobile, amount):
+    payload = generate_promptpay_qr_payload(mobile=mobile, amount=amount, one_time=True)
+    qr = qrcode.make(payload)
+    buffer = io.BytesIO()
+    qr.save(buffer, format="PNG")
+    qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+    return qr_base64
+
 
