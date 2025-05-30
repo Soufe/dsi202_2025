@@ -13,12 +13,16 @@ urlpatterns = [
     path('tree/<int:tree_id>/', views.tree_detail, name='tree_detail'),
     path('tree/order/<int:tree_id>/', views.tree_order, name='tree_order'),
 
+
     # 📦 แผนการปลูก
     path('planting-plan/', views.planting_plan, name='planting_plan'),
 
     # 🛠️ ร้านอุปกรณ์
     path('equipment-list/', views.equipment_list, name='equipment_list'),
     path('equipment/<int:equipment_id>/', views.equipment_detail, name='equipment_detail'),
+    path('equipment-order/', views.equipment_order, name='equipment_order'),
+    
+
 
     # 🌿 ต้นไม้ของฉัน
     path('my-trees/', views.my_trees, name='my_trees'),
@@ -41,6 +45,7 @@ urlpatterns = [
     path('remove-from-cart/<int:item_id>/', views.remove_from_cart, name='remove_from_cart'),
     path('checkout/', views.checkout_selected, name='checkout_selected'),
 
-    
+    # ✅ ใช้ payment แทน confirm_cart_order
+    path('payment/', views.payment, name='payment'),
 
 ]

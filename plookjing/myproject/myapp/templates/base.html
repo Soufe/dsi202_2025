@@ -16,30 +16,30 @@
   <!-- Navbar -->
   <nav class="bg-white shadow-md sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-      
-      <!-- Left section: Logo + Menu -->
+
+      <!-- Left: Logo & Menu -->
       <div class="flex items-center space-x-8">
-        <a href="{% url 'home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
+        <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
         <ul class="flex space-x-6 text-green-800 font-normal">
-          <li><a href="{% url 'home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
-          <li><a href="{% url 'select_tree' %}" class="hover:text-orange-500">ต้นไม้</a></li>
-          <li><a href="{% url 'equipment_list' %}" class="hover:text-orange-500">อุปกรณ์</a></li>
-          <li><a href="{% url 'about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
+          <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
+          <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">ต้นไม้</a></li>
+          <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">อุปกรณ์</a></li>
+          <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
         </ul>
       </div>
 
-      <!-- Right section: Profile + Cart -->
+      <!-- Right: Cart & Profile -->
       <div class="flex items-center space-x-4">
         <!-- 🛒 Cart -->
-        <a href="{% url 'cart' %}">
+        <a href="{% url 'myapp:cart' %}">
           <img src="{% static 'images/basket.svg' %}" alt="Cart Icon" class="w-6 h-6 hover:opacity-80">
         </a>
-
         <!-- 👤 Profile -->
-        <a href="{% url 'user_profile' %}">
-          <img src="{% static 'images/user.svg' %}" alt="Profile" class="w-8 h-8 rounded-full border hover:ring-2">
+        <a href="{% url 'myapp:user_profile' %}">
+          <img src="{% static 'images/user.svg' %}" alt="Profile Icon" class="w-8 h-8 rounded-full border hover:ring-2">
         </a>
       </div>
+
     </div>
   </nav>
 
