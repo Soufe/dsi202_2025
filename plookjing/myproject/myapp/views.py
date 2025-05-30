@@ -338,8 +338,21 @@ def upload_slip_tree(request):
 # 🌱 ต้นไม้ของฉัน
 @login_required
 def my_trees(request):
-    tree_orders = Purchase.objects.filter(user=request.user, type='tree').order_by('-created_at')
-    return render(request, 'myapp/my_trees.html', {'tree_orders': tree_orders})
+    status_choices = ['ทั้งหมด', 'กำลังปลูก', 'ปลูกแล้ว', 'ยกเลิก']
+    selected_status = request.GET.get('status')
+
+    tree_orders = UserPlanting.objects.filter(user=request.user)
+
+    if selected_status and selected_status != 'ทั้งหมด':
+        tree_orders = tree_orders.filter(status=selected_status)
+
+    context = {
+        'trees': tree_orders,
+        'status_choices': status_choices,
+        'selected_status': selected_status,
+    }
+    return render(request, 'myapp/my_trees.html', context)
+
 
 
 
