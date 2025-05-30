@@ -362,6 +362,8 @@ def my_trees(request):
 
 
 
+
+
 @login_required
 def payment_equipment(request):
     cart = request.session.get('cart', [])
