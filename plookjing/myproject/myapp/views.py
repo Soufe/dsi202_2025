@@ -4,9 +4,11 @@ from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from .models import Tree, Equipment, Notification, Purchase, UserPlanting
+from datetime import datetime
 import stripe
 from django.conf import settings
 from .promptpay_qr import generate_promptpay_qr_payload
+from .promptpay_qr import create_promptpay_qr_base64
 import qrcode
 import io
 import base64
@@ -208,12 +210,6 @@ def about(request):
 def user_profile(request):
     return render(request, 'myapp/user_profile.html', {'user': request.user})
 
-# 🌱 ต้นไม้ของฉัน
-@login_required
-def my_trees(request):
-    trees = UserPlanting.objects.filter(user=request.user)
-    return render(request, 'myapp/mytree.html', {'trees': trees})
-
 # 🧾 ประวัติการสั่งซื้อ
 @login_required
 def purchase_history(request):
@@ -244,6 +240,7 @@ def tree_order(request, tree_id):
                 'quantity': item['quantity'],
                 'total_price': float(tree.price) * item['quantity']
             })
+
 
     provinces = [
         "กรุงเทพมหานคร", "กระบี่", "กาญจนบุรี", "กาฬสินธุ์", "กำแพงเพชร", "ขอนแก่น", "จันทบุรี", "ฉะเชิงเทรา", "ชลบุรี",
@@ -296,34 +293,115 @@ from datetime import datetime
 
 @login_required
 def payment_tree(request):
-    tree_cart = [item for item in request.session.get('checkout_cart', []) if item['type'] == 'tree']
-    total = sum(item['price'] * item['quantity'] for item in tree_cart)
-    qr_base64 = create_promptpay_qr_base64("0922894514", total)
+    cart = request.session.get('cart', [])
+    tree_cart = []
+
+    for item in cart:
+        if item.get('type') == 'tree':
+            try:
+                tree = Tree.objects.get(id=item['id'])
+                quantity = int(item.get('quantity', 1))
+                price = float(item.get('price', tree.price))
+                total_price = price * quantity
+                tree_cart.append({
+                    'id': tree.id,
+                    'name': tree.name,
+                    'image_url': tree.image.url if tree.image else '',
+                    'quantity': quantity,
+                    'price': price,
+                    'total_price': total_price,
+                })
+            except Tree.DoesNotExist:
+                continue
+
+    total = sum(item['total_price'] for item in tree_cart)
     now = datetime.now()
+    qr_base64 = create_promptpay_qr_base64("0922894514", total)
 
     return render(request, 'myapp/payment_tree.html', {
         'items': tree_cart,
         'total': total,
         'qr_base64': qr_base64,
-        'order_date': now.strftime("%Y-%m-%d %H:%M"),
-        'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}"
+        'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}",
+        'order_date': now.strftime('%Y-%m-%d %H:%M'),
     })
+
+@login_required
+def upload_slip_tree(request):
+    if request.method == 'POST' and request.FILES.get('slip'):
+        slip = request.FILES['slip']
+        # TODO: บันทึก slip ลง model หรือ session
+
+        return redirect('myapp:my_trees') 
+    return redirect('myapp:tree_list')  # fallback ถ้าไม่ใช่ POST
+
+# 🌱 ต้นไม้ของฉัน
+@login_required
+def my_trees(request):
+    tree_orders = Purchase.objects.filter(user=request.user, type='tree').order_by('-created_at')
+    return render(request, 'myapp/my_trees.html', {'tree_orders': tree_orders})
+
+
+
+
+
+
+
 
 
 @login_required
 def payment_equipment(request):
-    equipment_cart = [item for item in request.session.get('checkout_cart', []) if item['type'] == 'equipment']
-    total = sum(item['price'] * item['quantity'] for item in equipment_cart)
-    qr_base64 = create_promptpay_qr_base64("0922894514", total)
+    cart = request.session.get('cart', [])
+    equipment_cart = []
+
+    for item in cart:
+        if item.get('type') == 'equipment':
+            try:
+                equipment = Equipment.objects.get(id=item['id'])
+                quantity = int(item.get('quantity', 1))
+                price = float(equipment.price)
+                total_price = price * quantity
+                equipment_cart.append({
+                    'id': equipment.id,
+                    'name': equipment.name,
+                    'image_url': equipment.image.url if equipment.image else '',
+                    'quantity': quantity,
+                    'price': price,
+                    'total_price': total_price,
+                })
+            except Equipment.DoesNotExist:
+                continue
+
+    total = sum(item['total_price'] for item in equipment_cart)
     now = datetime.now()
+    qr_base64 = create_promptpay_qr_base64("0922894514", total)
 
     return render(request, 'myapp/payment_equipment.html', {
         'items': equipment_cart,
         'total': total,
         'qr_base64': qr_base64,
         'order_date': now.strftime("%Y-%m-%d %H:%M"),
-        'order_id': f"EQUIP{now.strftime('%Y%m%d%H%M%S')}"
+        'order_id': f"EQUIP{now.strftime('%Y%m%d%H%M%S')}",
     })
+
+
+@login_required
+def upload_slip_equipment(request):
+    if request.method == 'POST' and request.FILES.get('slip'):
+        slip = request.FILES['slip']
+        # TODO: บันทึก slip กับคำสั่งซื้อ (ควรใช้ session หรือ DB)
+        # ตัวอย่าง: save_to_model_or_session(request.user, slip)
+
+        # 🔁 แนะนำ redirect ไปหน้า my_orders หรือหน้าสรุปผล
+        return redirect('myapp:my_orders')
+    return redirect('home')  # fallback ถ้าไม่ใช่ POST
+
+@login_required
+def my_orders(request):
+    orders = Purchase.objects.filter(user=request.user, type='equipment').order_by('-created_at')
+    return render(request, 'myapp/my_orders.html', {'orders': orders})
+
+
 
 
 

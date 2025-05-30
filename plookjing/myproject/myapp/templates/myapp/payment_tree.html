@@ -5,7 +5,7 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 mt-10 font-prompt">
-  <h1 class="text-3xl font-bold text-green-700 mb-6">🌱 ชำระเงินสำหรับต้นไม้</h1>
+  <h1 class="text-3xl font-bold text-green-700 mb-6">ชำระเงิน</h1>
 
   <!-- 🧾 รายการต้นไม้ในคำสั่งซื้อ -->
   <ul class="divide-y divide-gray-200 mb-6">
@@ -33,11 +33,12 @@
   </div>
 
   <!-- 📤 อัปโหลดสลิป -->
-  <form action="{% url 'upload_slip_tree' %}" method="post" enctype="multipart/form-data" class="mt-4 bg-white rounded-xl p-4 border border-dashed border-green-300">
+  <form action="{% url 'myapp:upload_slip_tree' %}" method="post" enctype="multipart/form-data" class="mt-4 bg-white rounded-xl p-4 border border-dashed border-green-300">
     {% csrf_token %}
-    <label for="slip" class="block mb-2 font-medium text-gray-700">📎 แนบสลิปการชำระเงิน:</label>
+    <label for="slip" class="block mb-2 font-medium text-gray-700">แนบสลิปการชำระเงิน:</label>
     <input type="file" name="slip" id="slip" accept="image/*" required class="mb-4 w-full border border-gray-300 p-2 rounded">
-    <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl transition">ยืนยันการชำระเงิน</button>
+    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-xl transition">ยืนยันการชำระเงิน</button>
   </form>
 </div>
+
 {% endblock %}

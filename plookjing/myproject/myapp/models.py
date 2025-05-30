@@ -92,7 +92,13 @@ class Purchase(models.Model):
     image_url = models.URLField(blank=True)
     quantity = models.PositiveIntegerField(default=1)
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
-    status = models.CharField(max_length=20, default='pending')  # pending, verifying, preparing, shipping, delivered, cancelled
+    type = models.CharField(
+        max_length=20,
+        choices=[('tree', 'Tree'), ('equipment', 'Equipment')],
+        default='tree'
+    )
+
+    status = models.CharField(max_length=20, choices=[('pending', 'Pending'), ('verifying', 'Verifying'), ('confirmed', 'Confirmed')], default='pending')
     address = models.CharField(max_length=255, blank=True)
     tel = models.CharField(max_length=20, blank=True)
     payment_slip = models.ImageField(upload_to='slips/', blank=True, null=True)

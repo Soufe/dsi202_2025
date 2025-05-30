@@ -23,10 +23,6 @@ urlpatterns = [
     path('equipment-order/', views.equipment_order, name='equipment_order'),
     
 
-
-    # 🌿 ต้นไม้ของฉัน
-    path('my-trees/', views.my_trees, name='my_trees'),
-
     # 🧾 ประวัติการสั่งซื้อ
     path('purchase-history/', views.purchase_history, name='purchase_history'),
 
@@ -47,5 +43,10 @@ urlpatterns = [
 
     path('tree/payment/', views.payment_tree, name='payment_tree'),
     path('equipment/payment/', views.payment_equipment, name='payment_equipment'),
+
+    path('upload-slip-tree/', views.upload_slip_tree, name='upload_slip_tree'),
+    path('upload-slip-equipment/', views.upload_slip_equipment, name='upload_slip_equipment'),
+    path('my-orders/', views.my_orders, name='my_orders'),
+    path('my-trees/', views.my_trees, name='my_trees'),
 
 ]

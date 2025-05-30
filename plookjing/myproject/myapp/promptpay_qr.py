@@ -2,7 +2,6 @@ import libscrc
 import qrcode # For generating QR code images
 from PIL import Image # Pillow library, a dependency of qrcode
 import io # For handling in-memory image data
-from IPython.display import display, Image as IPImage # For displaying images in Jupyter
 from typing import Union, Optional
 
 # --- EMVCo Tag Constants ---
@@ -187,10 +186,34 @@ def display_promptpay_qr(
         img.save(img_byte_arr, format='PNG')
         img_byte_arr = img_byte_arr.getvalue()
 
-        # 4. Display the image in Jupyter Notebook
-        display(IPImage(data=img_byte_arr))
+        display(IPImage(data=img_byte_arr)) 
 
     except QRError as e:
         print(f"Error generating QR code: {e}")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+    
+import base64  # ✅ อย่าลืมเพิ่มด้านบนของไฟล์ด้วย
+
+def create_promptpay_qr_base64(mobile: str, amount: float) -> str:
+    payload = generate_promptpay_qr_payload(mobile=mobile, amount=amount)
+
+    qr_img = qrcode.QRCode(
+        version=None,
+        error_correction=qrcode.constants.ERROR_CORRECT_M,
+        box_size=10,
+        border=4,
+    )
+    qr_img.add_data(payload)
+    qr_img.make(fit=True)
+
+    img = qr_img.make_image(fill_color="black", back_color="white")
+
+    # ✅ สำหรับ debug: เซฟไฟล์ QR ลงเครื่อง
+    img.save("output.png")
+
+    # ✅ แปลงเป็น base64 แล้ว return
+    img_byte_arr = io.BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    return base64.b64encode(img_byte_arr.getvalue()).decode('utf-8')
