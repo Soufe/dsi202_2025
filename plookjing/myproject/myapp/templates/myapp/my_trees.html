@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}ต้นไม้ของฉัน | PLOOKJING{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow font-prompt mt-10">
+  <h1 class="text-2xl font-bold text-green-700 mb-6">🌳 ต้นไม้ของฉัน</h1>
+
+  {% if tree_orders %}
+    <ul class="divide-y divide-gray-200">
+      {% for order in tree_orders %}
+      <li class="py-4">
+        <p class="font-semibold text-green-800">ต้นไม้: {{ order.product.name }}</p>
+        <p class="text-sm text-gray-500">จำนวน: {{ order.quantity }} | วันที่สั่งซื้อ: {{ order.created_at|date:"Y-m-d H:i" }}</p>
+        <p class="text-sm">สถานะ: <span class="text-orange-600">{{ order.status }}</span></p>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-gray-500">คุณยังไม่มีคำสั่งซื้อต้นไม้</p>
+  {% endif %}
+</div>
+{% endblock %}
