@@ -1,4 +1,4 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
 from django.contrib.auth import views as auth_views
 
@@ -27,7 +27,7 @@ urlpatterns = [
     path('purchase-history/', views.purchase_history, name='purchase_history'),
 
     # 🔔 แจ้งเตือน
-    path('notifications/', views.notifications, name='view_notifications'),
+    path('notifications/', views.notifications, name='notifications'),
 
     # 👤 โปรไฟล์ & เกี่ยวกับเรา
     path('about/', views.about, name='about'),
@@ -50,5 +50,7 @@ urlpatterns = [
     path('my-trees/', views.my_trees, name='my_trees'),
 
     path('tree/confirm/', views.confirm_tree_order, name='confirm_tree_order'),
+
+    path('accounts/', include('allauth.urls')),
 
 ]

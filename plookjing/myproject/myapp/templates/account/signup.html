@@ -1,10 +1,41 @@
-{% extends "base.html" %}
-{% block content %}
-  <h2>สมัครสมาชิก</h2>
-  <form method="POST" action="{% url 'account_signup' %}">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">สมัคร</button>
-  </form>
-  <p>มีบัญชีแล้ว? <a href="{% url 'account_login' %}">เข้าสู่ระบบ</a></p>
-{% endblock %}
+{% load static %}
+{% load widget_tweaks %}
+
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>สมัครสมาชิก | PLOOKJING</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-[Prompt] bg-gradient-to-br from-green-50 to-yellow-50 min-h-screen flex items-center justify-center px-4">
+
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <h1 class="text-3xl font-bold text-green-700 text-center mb-6">สมัครสมาชิก 🌿</h1>
+
+    <form method="POST" action="{% url 'account_signup' %}" class="space-y-5">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      {% for field in form %}
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+          {{ field|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-400" }}
+          {{ field.errors }}
+        </div>
+      {% endfor %}
+
+      <button type="submit" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition">
+        สมัครสมาชิก
+      </button>
+    </form>
+
+    <!-- 🔗 ลิงก์เพิ่มเติม -->
+    <div class="text-center text-sm text-gray-600 space-y-1 mt-6">
+      <p>มีบัญชีอยู่แล้ว? <a href="{% url 'account_login' %}" class="text-green-700 hover:underline">เข้าสู่ระบบ</a></p>
+    </div>
+  </div>
+
+</body>
+</html>

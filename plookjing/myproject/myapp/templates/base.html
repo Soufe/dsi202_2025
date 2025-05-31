@@ -13,35 +13,42 @@
 </head>
 <body class="bg-green-50 text-gray-800">
 
-  <!-- Navbar -->
-  <nav class="bg-white shadow-md sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+<!-- Navbar -->
+<nav class="bg-white shadow-md sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
 
-      <!-- Left: Logo & Menu -->
-      <div class="flex items-center space-x-8">
-        <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
-        <ul class="flex space-x-6 text-green-800 font-normal">
-          <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
-          <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">ต้นไม้</a></li>
-          <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">อุปกรณ์</a></li>
-          <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
-        </ul>
-      </div>
-
-      <!-- Right: Cart & Profile -->
-      <div class="flex items-center space-x-4">
-        <!-- 🛒 Cart -->
-        <a href="{% url 'myapp:cart' %}">
-          <img src="{% static 'images/basket.svg' %}" alt="Cart Icon" class="w-6 h-6 hover:opacity-80">
-        </a>
-        <!-- 👤 Profile -->
-        <a href="{% url 'myapp:user_profile' %}">
-          <img src="{% static 'images/user.svg' %}" alt="Profile Icon" class="w-8 h-8 rounded-full border hover:ring-2">
-        </a>
-      </div>
-
+    <!-- Left: Logo & Menu -->
+    <div class="flex items-center space-x-8">
+      <a href="{% url 'myapp:home' %}" class="text-2xl font-bold text-green-700">PLOOKJING</a>
+      <ul class="flex space-x-6 text-green-800 font-normal">
+        <li><a href="{% url 'myapp:home' %}" class="hover:text-orange-500">หน้าหลัก</a></li>
+        <li><a href="{% url 'myapp:select_tree' %}" class="hover:text-orange-500">ต้นไม้</a></li>
+        <li><a href="{% url 'myapp:equipment_list' %}" class="hover:text-orange-500">อุปกรณ์</a></li>
+        <li><a href="{% url 'myapp:my_trees' %}" class="hover:text-orange-500">My Trees</a></li>
+        <li><a href="{% url 'myapp:my_orders' %}" class="hover:text-orange-500">My Orders</a></li>
+        <li><a href="{% url 'myapp:about' %}" class="hover:text-orange-500">เกี่ยวกับเรา</a></li>
+      </ul>
     </div>
-  </nav>
+
+    <!-- Right: Notification, Cart & Profile -->
+    <div class="flex items-center space-x-4">
+      <!-- 🔔 Notification -->
+      <a href="{% url 'myapp:notifications' %}">
+        <img src="{% static 'images/icons8-notification.svg' %}" alt="Notification Icon" class="w-6 h-6 hover:opacity-80">
+      </a>
+      <!-- 🛒 Cart -->
+      <a href="{% url 'myapp:cart' %}">
+        <img src="{% static 'images/basket.svg' %}" alt="Cart Icon" class="w-6 h-6 hover:opacity-80">
+      </a>
+      <!-- 👤 Profile -->
+      <a href="{% url 'myapp:user_profile' %}">
+        <img src="{% static 'images/user.svg' %}" alt="Profile Icon" class="w-8 h-8 rounded-full border hover:ring-2">
+      </a>
+    </div>
+
+  </div>
+</nav>
+
 
   <!-- Page Content -->
   <main class="max-w-7xl mx-auto px-4 py-8">

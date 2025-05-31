@@ -1,21 +1,55 @@
-{% extends "base.html" %}
-{% load i18n %}
-{% load account socialaccount %}
+{% load static %}
+{% load widget_tweaks %}
 
-{% block title %}เข้าสู่ระบบ | PLOOKJING{% endblock %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เข้าสู่ระบบ | PLOOKJING</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-[Prompt] bg-gradient-to-br from-green-50 to-yellow-50 min-h-screen flex items-center justify-center px-4">
 
-{% block content %}
-<div class="max-w-md mx-auto mt-10 bg-white p-6 rounded-lg shadow-md">
-  <h2 class="text-2xl font-bold mb-6 text-center text-green-700">เข้าสู่ระบบ</h2>
-  <form method="POST" action="{% url 'account_login' %}" class="space-y-4">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded">
-      เข้าสู่ระบบ
-    </button>
-  </form>
-  <p class="mt-4 text-center text-sm text-gray-600">
-    ยังไม่มีบัญชี? <a href="{% url 'account_signup' %}" class="text-orange-600 hover:underline">สมัครสมาชิก</a>
-  </p>
-</div>
-{% endblock %}
+  <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
+    <h1 class="text-3xl font-bold text-green-700 text-center mb-6">เข้าสู่ระบบ 🌱</h1>
+
+    <form method="POST" action="{% url 'account_login' %}" class="space-y-5">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+
+      <!-- Email/Username -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">อีเมล / ผู้ใช้</label>
+        {{ form.login|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-400" }}
+        {{ form.login.errors }}
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">รหัสผ่าน</label>
+        {{ form.password|add_class:"w-full border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-green-400" }}
+        {{ form.password.errors }}
+      </div>
+
+      <!-- Remember me -->
+      <div class="flex items-center gap-2">
+        {{ form.remember|add_class:"h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded" }}
+        <label class="text-sm text-gray-600">จดจำฉันไว้</label>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="w-full bg-green-600 text-white font-semibold py-2 rounded-lg hover:bg-green-700 transition">
+        เข้าสู่ระบบ
+      </button>
+    </form>
+
+    <!-- 🔗 ลิงก์เพิ่มเติม -->
+    <div class="text-center text-sm text-gray-600 space-y-1 mt-6">
+      <p>ลืมรหัสผ่าน? <a href="{% url 'account_reset_password' %}" class="text-green-700 hover:underline">คลิกที่นี่</a></p>
+      <p>ยังไม่มีบัญชี? <a href="{% url 'account_signup' %}" class="text-green-700 hover:underline">สมัครสมาชิก</a></p>
+    </div>
+  </div>
+
+</body>
+</html>

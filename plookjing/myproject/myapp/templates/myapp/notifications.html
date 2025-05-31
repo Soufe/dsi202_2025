@@ -1,22 +1,29 @@
 {% extends 'base.html' %}
-
-{% block title %}การแจ้งเตือน | PLOOKJING{% endblock %}
-
+{% block title %}แจ้งเตือน{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto p-6 bg-white rounded-xl shadow">
+<div class="max-w-3xl mx-auto bg-white p-6 rounded-xl shadow font-prompt">
   <h1 class="text-2xl font-bold text-green-700 mb-4">🔔 การแจ้งเตือน</h1>
 
-  {% if alerts %}
+  {% if tree_notifications or equipment_notifications %}
     <ul class="space-y-4">
-      {% for alert in alerts %}
-        <li class="p-4 bg-green-50 border-l-4 border-green-400 rounded">
-          <p class="text-gray-700">{{ alert.message }}</p>
-          <p class="text-sm text-gray-500">{{ alert.created_at|date:"d M Y, H:i" }}</p>
+
+      {% for tree in tree_notifications %}
+        <li class="p-4 bg-green-50 border border-green-200 rounded-xl">
+          <div class="text-lg text-green-800 font-semibold">🌳 ต้นไม้ "{{ tree.tree.name }}" ปลูกเสร็จแล้ว</div>
+          <div class="text-sm text-gray-500">ปลูกที่ {{ tree.location }} เมื่อ {{ tree.planted_date|date:"d M Y" }}</div>
         </li>
       {% endfor %}
+
+      {% for item in equipment_notifications %}
+        <li class="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+          <div class="text-lg text-blue-800 font-semibold">📦 อุปกรณ์ "{{ item.product_name }}" จัดส่งสำเร็จแล้ว</div>
+          <div class="text-sm text-gray-500">จำนวน {{ item.quantity }} ชิ้น | สั่งเมื่อ {{ item.created_at|date:"d M Y" }}</div>
+        </li>
+      {% endfor %}
+
     </ul>
   {% else %}
-    <p class="text-gray-500">คุณยังไม่มีการแจ้งเตือน</p>
+    <p class="text-center text-gray-400">ยังไม่มีการแจ้งเตือน</p>
   {% endif %}
 </div>
 {% endblock %}

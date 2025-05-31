@@ -50,10 +50,19 @@ class EquipmentOrder(models.Model):
 
 # -------------------- การปลูกต้นไม้ --------------------
 class UserTree(models.Model):
+    STATUS_CHOICES = [
+        ('in_progress', 'กำลังดำเนินการ'),
+        ('completed', 'ปลูกเสร็จแล้ว'),
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     tree = models.ForeignKey(Tree, on_delete=models.CASCADE)
     location = models.CharField(max_length=255)
     planted_date = models.DateField(auto_now_add=True)
+
+    # ✅ เพิ่ม 2 field ด้านล่างนี้
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.username} - {self.tree.name}"
@@ -114,6 +123,14 @@ class UserPlanting(models.Model):
 
 
 class UserEquipment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'รอตรวจสอบ'),       # ผู้ใช้อัปโหลดสลิปแล้ว
+        ('verifying', 'กำลังตรวจสอบ'),   # แอดมินกำลังตรวจสลิป
+        ('confirmed', 'ยืนยันแล้ว'),     # แอดมินอนุมัติสลิป
+        ('shipping', 'กำลังจัดส่ง'),     # แพ็คของ/ส่ง
+        ('delivered', 'จัดส่งสำเร็จ'),   # ถึงมือแล้ว
+    ]
+
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product_name = models.CharField(max_length=255, blank=True)
     image_url = models.URLField(blank=True)
@@ -123,17 +140,14 @@ class UserEquipment(models.Model):
     address = models.CharField(max_length=255, blank=True)
     tel = models.CharField(max_length=20, blank=True)
     payment_slip = models.ImageField(upload_to='slips/', blank=True, null=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     status = models.CharField(
         max_length=20,
-        choices=[
-            ('pending', 'Pending'),
-            ('verifying', 'Verifying'),
-            ('confirmed', 'Confirmed'),
-            ('delivered', 'Delivered'),
-            ('cancelled', 'Cancelled'),
-        ],
+        choices=STATUS_CHOICES,
         default='pending'
     )
+
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -144,13 +158,10 @@ class UserEquipment(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.equipment.name} x{self.quantity}"
-    
+
     @property
-    def image(self):
-        try:
-            return Equipment.objects.get(id=self.product_id).image
-        except Equipment.DoesNotExist:
-            return None
+    def image_preview(self):
+        return self.equipment.image.url if self.equipment and self.equipment.image else ""
 
 
     

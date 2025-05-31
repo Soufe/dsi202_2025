@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import Tree, Equipment, Notification, UserPlanting, UserEquipment
+from .models import Tree, Equipment, Notification, UserPlanting, UserEquipment, UserTree
 from datetime import datetime, date
 import stripe
 from django.conf import settings
@@ -317,6 +317,7 @@ def confirm_tree_order(request):
 
 
 # ✅ ยืนยันที่อยู่ → ไปยัง equipment_order
+
 @login_required
 def equipment_order(request):
     cart = request.session.get('cart', [])
@@ -335,10 +336,20 @@ def equipment_order(request):
 
     total_equipment = sum(item['total_price'] for item in equipment_items)
 
+    # ✅ ดึงข้อมูลที่เคยกรอกไว้จาก session (ถ้ามี)
+    order_info = request.session.get('order_info', {})
+    name = order_info.get('name', '')
+    tel = order_info.get('tel', '')
+    address = order_info.get('address', '')
+
     return render(request, 'myapp/equipment_order.html', {
         'equipment_items': equipment_items,
         'total_equipment': total_equipment,
+        'name': name,
+        'tel': tel,
+        'address': address,
     })
+
 
 
 
@@ -380,6 +391,21 @@ def payment_tree(request):
         'order_date': now.strftime("%Y-%m-%d %H:%M"),
         'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}",
     })
+
+
+
+
+@login_required
+def confirm_cart_equipment(request):
+    if request.method == 'POST':
+        cart = request.session.get('cart', [])
+        selected_items = [item for item in cart if item['type'] == 'equipment' and item.get('selected')]
+        request.session['cart'] = selected_items  # ✅ set cart สำหรับชำระ
+        return redirect('myapp:equipment_order')
+    return redirect('myapp:cart')
+
+
+
 
 
 @login_required
@@ -473,10 +499,7 @@ def my_trees(request):
 
 
 
-
-
-
-
+#-----------------------------------
 
 
 
@@ -484,28 +507,79 @@ def my_trees(request):
 
 @login_required
 def payment_equipment(request):
-    if request.method == 'POST' and request.FILES.get('slip'):
-        slip = request.FILES['slip']
-        cart = request.session.get('checkout_cart', [])
-        order_info = request.session.get('order_info', {})
+    if request.method == 'POST':
+        if request.FILES.get('slip'):
+            slip = request.FILES['slip']
+            cart = request.session.get('cart', [])
+            order_info = request.session.get('order_info', {})
 
-        for item in cart:
-            if item['type'] == 'equipment':
-                UserEquipment.objects.create(
-                    user=request.user,
-                    equipment_id=item['id'],
-                    quantity=item['quantity'],
-                    address=order_info.get('address', ''),
-                    tel=order_info.get('tel', ''),
-                    payment_slip=slip,
-                    status='pending',  # ✅ default after payment
-                )
+            for item in cart:
+                if item['type'] == 'equipment':
+                    equipment = get_object_or_404(Equipment, id=item['id'])
 
-        # ✅ Clear session cart
-        request.session['checkout_cart'] = []
+                    UserEquipment.objects.create(
+                        user=request.user,
+                        equipment=equipment,
+                        product_name=equipment.name,
+                        image_url=equipment.image.url if equipment.image else '',
+                        quantity=item['quantity'],
+                        address=order_info.get('address', ''),
+                        tel=order_info.get('tel', ''),
+                        payment_slip=slip,
+                        status='pending',
+                    )
 
-        return redirect('myapp:my_orders')  # ✅ ลิงก์ไปหน้าแสดงรายการ
-    return redirect('myapp:equipment_list')
+            request.session['cart'] = []
+            return redirect('myapp:my_orders')
+
+        else:
+            # 📝 บันทึกข้อมูลที่อยู่จัดส่ง
+            name = request.POST.get('name')
+            tel = request.POST.get('tel')
+            address = request.POST.get('address')
+            request.session['order_info'] = {
+                'name': name,
+                'tel': tel,
+                'address': address
+            }
+
+            cart = request.session.get('cart', [])
+            equipment_items = [item for item in cart if item['type'] == 'equipment']
+
+            detailed_items = []
+            total = 0
+            for item in equipment_items:
+                equipment = get_object_or_404(Equipment, id=item['id'])
+                quantity = item.get('quantity', 1)
+                total_price = equipment.price * quantity
+                total += total_price
+
+                detailed_items.append({
+                    'name': equipment.name,
+                    'image_url': equipment.image.url if equipment.image else '',
+                    'quantity': quantity,
+                    'price': equipment.price,
+                    'total_price': total_price,
+                })
+
+            # ✅ สร้าง QR code สำหรับ PromptPay
+            qr_base64 = create_promptpay_qr_base64("0922894514", total)
+
+            return render(request, 'myapp/payment_equipment.html', {
+                'items': detailed_items,
+                'total': total,
+                'name': name,
+                'tel': tel,
+                'address': address,
+                'qr_base64': qr_base64,
+                'order_date': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            })
+
+    return redirect('myapp:equipment_order')
+
+
+
+
 
 
 
@@ -561,3 +635,38 @@ def create_promptpay_qr_base64(mobile, amount):
     return qr_base64
 
 
+
+#---------------------------
+
+
+@login_required
+def notifications(request):
+    # ✅ ดึงเฉพาะต้นไม้ที่ปลูกเสร็จ (Completed)
+    tree_notifs = UserTree.objects.filter(user=request.user, status='Completed')
+
+    # ✅ ดึงเฉพาะอุปกรณ์ที่จัดส่งสำเร็จ (delivered)
+    equipment_notifs = UserEquipment.objects.filter(user=request.user, status='delivered')
+
+    notifications = []
+
+    for t in tree_notifs:
+        notifications.append({
+            "title": f"ต้นไม้ชื่อ {t.tree.name} ได้รับการปลูกแล้ว ✨",
+            "timestamp": t.planted_date.strftime("%Y-%m-%d %H:%M")
+        })
+
+    for e in equipment_notifs:
+        notifications.append({
+            "title": f"สินค้า {e.product_name} จัดส่งสำเร็จแล้ว 🚚",
+            "timestamp": e.created_at.strftime("%Y-%m-%d %H:%M")
+        })
+
+    # ✅ เรียงจากใหม่ไปเก่า
+    notifications.sort(key=lambda x: x["timestamp"], reverse=True)
+
+    return render(request, 'myapp/notifications.html', {'notifications': notifications})
+
+
+@login_required
+def user_profile(request):
+    return render(request, 'myapp/user_profile.html')

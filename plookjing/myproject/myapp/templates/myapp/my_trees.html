@@ -20,8 +20,7 @@
 
             <div>
               <div class="text-lg font-semibold text-green-700">{{ tree.tree.name }}</div>
-              <div class="text-sm text-gray-600">📍 {{ tree.location_name }} </div>
-              <div class="text-sm text-gray-600">🗓️ {{ tree.planted_date|date:"d M Y" }}</div>
+              <div class="text-sm s="text-sm text-gray-600">🗓️ {{ tree.planted_date|date:"d M Y" }}</div>
               <div class="text-sm text-gray-600">🪴 จำนวน: {{ tree.quantity }} ต้น</div>
 
               <!-- ✅ แถบสถานะ -->
@@ -40,7 +39,8 @@
 
           <!-- 👁️‍🗨️ ปุ่มดูรายละเอียด -->
           <button onclick="openModal('modal-{{ forloop.counter }}')" class="text-orange-600 hover:underline">
-            รายละเอียด
+            รายละเอียด📍 {{ tree.location_name }} </div>
+              <div class>
           </button>
         </div>
 
