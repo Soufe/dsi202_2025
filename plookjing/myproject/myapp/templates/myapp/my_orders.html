@@ -1,100 +1,74 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block content %}
-<div class="max-w-5xl mx-auto px-4 py-10 font-[Prompt]">
-  <h1 class="text-3xl font-bold text-green-800 mb-6">📦 คำสั่งซื้อของฉัน</h1>
+{% block title %}คำสั่งซื้อของฉัน | PLOOKJING{% endblock %}
 
-  <!-- 🔍 แถบตัวกรองสถานะ -->
-  <div class="flex gap-3 mb-6">
-    {% for status in ['ทั้งหมด', 'รอดำเนินการ', 'กำลังจัดส่ง', 'จัดส่งแล้ว', 'ยกเลิก'] %}
-      <a href="?status={{ status }}" class="px-4 py-2 rounded-full text-sm font-medium
-        {% if request.GET.status == status or (not request.GET.status and status == 'ทั้งหมด') %}
-          bg-orange-600 text-white
-        {% else %}
-          bg-gray-200 text-gray-700 hover:bg-orange-100
-        {% endif %}">
+{% block content %}
+<div class="max-w-5xl mx-auto mt-10 px-4 font-prompt">
+  <h1 class="text-3xl font-bold text-green-700 mb-6">📦 คำสั่งซื้ออุปกรณ์</h1>
+
+  <!-- 🔍 แถบสถานะกรอง -->
+  <div class="flex gap-4 mb-6">
+    {% for status in status_choices %}
+      <a href="?status={{ status }}" class="px-4 py-2 rounded-full border 
+         {% if selected_status == status %}
+           bg-green-600 text-white font-semibold
+         {% else %}
+           border-green-300 text-green-600 hover:bg-green-100
+         {% endif %}
+       ">
         {{ status }}
       </a>
     {% endfor %}
   </div>
 
   {% if orders %}
-    <div class="grid gap-6">
-      {% for order in orders %}
-        <div class="bg-white shadow rounded-xl p-6 flex justify-between items-center">
-          <div class="flex items-center gap-4">
-            <img src="{{ order.first_item_image.url }}" alt="สินค้า" class="w-20 h-20 rounded-xl object-cover">
-            <div>
-              <div class="font-semibold text-green-800">{{ order.name }}</div>
-              <div class="text-sm text-gray-600">🛒 {{ order.total_items }} รายการ</div>
-              <div class="text-sm text-gray-600">🗓️ {{ order.date|date:"d M Y" }}</div>
-              <div class="mt-1">
-                <span class="inline-block px-3 py-1 rounded-full text-white text-xs font-medium
-                  {% if order.status == 'รอดำเนินการ' %} bg-yellow-500
-                  {% elif order.status == 'กำลังจัดส่ง' %} bg-blue-500
-                  {% elif order.status == 'จัดส่งแล้ว' %} bg-green-600
-                  {% elif order.status == 'ยกเลิก' %} bg-red-500
-                  {% endif %}">
-                  {{ order.status }}
-                </span>
-              </div>
-            </div>
+    {% for order in orders %}
+      <div class="bg-white shadow rounded-xl p-6 mb-6 border border-green-100">
+        <div class="flex justify-between items-center mb-4">
+          <div>
+            <p class="text-sm text-gray-500">รหัสคำสั่งซื้อ: <span class="font-medium">{{ order.id }}</span></p>
+            <p class="text-sm text-gray-500">วันที่สั่งซื้อ: {{ order.created_at|date:"Y-m-d H:i" }}</p>
           </div>
-
-          <!-- 🔍 ปุ่มดูรายละเอียด -->
-          <button onclick="openModal('modal-{{ order.id }}')" class="text-orange-600 hover:underline">
-            รายละเอียด
-          </button>
+          <div>
+            <span class="px-3 py-1 text-sm rounded-full
+              {% if order.status == 'pending' %}
+                bg-yellow-100 text-yellow-800
+              {% elif order.status == 'verifying' %}
+                bg-blue-100 text-blue-800
+              {% elif order.status == 'confirmed' %}
+                bg-green-100 text-green-800
+              {% else %}
+                bg-red-100 text-red-800
+              {% endif %}
+            ">
+              {{ order.get_status_display }}
+            </span>
+          </div>
         </div>
 
-        <!-- 📋 Modal รายละเอียดคำสั่งซื้อ -->
-        <div id="modal-{{ order.id }}" class="fixed inset-0 bg-black bg-opacity-50 hidden justify-center items-center z-50">
-          <div class="bg-white rounded-xl p-6 max-w-xl w-full relative">
-            <h2 class="text-xl font-bold text-green-700 mb-4">🧾 รายละเอียดคำสั่งซื้อ</h2>
-            <p><strong>คำสั่งซื้อ:</strong> #{{ order.id }}</p>
-            <p><strong>วันที่:</strong> {{ order.date|date:"d M Y" }}</p>
-            <p><strong>ที่อยู่จัดส่ง:</strong> {{ order.address }}</p>
-            <p><strong>เบอร์ติดต่อ:</strong> {{ order.tel }}</p>
-            <div class="my-4 border-t pt-4">
-              <h3 class="text-lg font-semibold text-orange-700 mb-2">🛍️ รายการสินค้า</h3>
-              {% for item in order.items %}
-                <div class="flex justify-between text-sm mb-1">
-                  <span>{{ item.name }} x{{ item.quantity }}</span>
-                  <span>{{ item.price|floatformat:2 }} บาท</span>
-                </div>
-              {% endfor %}
-              <div class="flex justify-between font-semibold mt-2 text-green-800">
-                <span>รวม</span>
-                <span>{{ order.total_price|floatformat:2 }} บาท</span>
-              </div>
-            </div>
-
-            {% if order.slip_url %}
-              <p><strong>สลิป:</strong> <a href="{{ order.slip_url.url }}" target="_blank" class="text-blue-600 underline">ดูสลิป</a></p>
+        <!-- 🛒 รายการสินค้าในคำสั่งซื้อ -->
+        <div class="flex items-center gap-4 mb-4">
+          {% with equipment=order.get_equipment %}
+            {% if equipment.image %}
+              <img src="{{ equipment.image.url }}" alt="{{ equipment.name }}" class="w-20 h-20 object-cover rounded border">
+            {% else %}
+              <div class="w-20 h-20 bg-gray-100 text-gray-500 flex items-center justify-center rounded border text-sm">No image</div>
             {% endif %}
-
-            <div class="mt-6 text-right">
-              <button onclick="closeModal('modal-{{ order.id }}')" class="text-red-600 hover:underline">ปิด</button>
+            <div class="flex-1">
+              <p class="text-green-800 font-semibold">{{ equipment.name }}</p>
+              <p class="text-gray-500 text-sm">จำนวน: {{ order.quantity }}</p>
             </div>
+          {% endwith %}
+          <div class="text-right text-green-600 font-semibold">
+            ฿{{ order.total_price|floatformat:2 }}
           </div>
         </div>
-      {% endfor %}
-    </div>
+
+      </div>
+    {% endfor %}
   {% else %}
-    <p class="text-gray-600">ยังไม่มีคำสั่งซื้อ</p>
+    <p class="text-center text-gray-400 mt-10">ไม่มีคำสั่งซื้อในสถานะนี้</p>
   {% endif %}
 </div>
-
-<!-- ✅ Script modal -->
-<script>
-  function openModal(id) {
-    document.getElementById(id).classList.remove('hidden');
-    document.getElementById(id).classList.add('flex');
-  }
-  function closeModal(id) {
-    document.getElementById(id).classList.add('hidden');
-    document.getElementById(id).classList.remove('flex');
-  }
-</script>
 {% endblock %}

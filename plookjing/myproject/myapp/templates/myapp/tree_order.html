@@ -1,43 +1,43 @@
 {% extends 'base.html' %}
-{% block title %}ยืนยันการปลูกต้นไม้{% endblock %}
+{% load static %}
+
+{% block title %}เลือกจังหวัดปลูกต้นไม้ | PLOOKJING{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow">
-  <h1 class="text-2xl font-bold text-green-800 mb-6">ยืนยันการปลูกต้นไม้</h1>
+<div class="max-w-4xl mx-auto bg-white rounded-2xl shadow p-8 mt-10 font-prompt">
+  <h1 class="text-3xl font-bold text-green-700 mb-6">เลือกจังหวัดสำหรับการปลูกต้นไม้</h1>
 
-  {% if tree_items %}
-    <form method="POST" action="{% url 'myapp:payment_tree' %}" class="space-y-6">
-      {% csrf_token %}
+  <form method="POST" action="{% url 'myapp:confirm_tree_order' %}">
+    {% csrf_token %}
+
+    <ul class="divide-y divide-gray-200 mb-6">
       {% for item in tree_items %}
-        <div class="border-b pb-6 mb-6 flex items-start space-x-4">
-          <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-24 h-24 object-cover rounded-lg border">
-          <div class="flex-1 space-y-2">
-            <h2 class="text-lg font-semibold">{{ item.name }}</h2>
-            <p class="text-gray-700">จำนวน: {{ item.quantity }} ต้น</p>
-            <p class="text-gray-700">ราคาต่อหน่วย: ฿{{ item.price|floatformat:2 }}</p>
-            <p class="font-semibold text-green-700">รวม: ฿{{ item.total_price|floatformat:2 }}</p>
+      <li class="py-4">
+        <div class="flex items-start space-x-4">
+          <img src="{{ item.image_url }}" alt="{{ item.name }}" class="w-20 h-20 object-cover rounded-lg border">
+          <div class="flex-1">
+            <h2 class="text-lg font-semibold text-green-800">{{ item.name }}</h2>
+            <p class="text-sm text-gray-500 mb-1">จำนวน: {{ item.quantity }}</p>
+            <p class="text-sm text-gray-500 mb-2">ราคา: {{ item.total_price|floatformat:2 }} บาท</p>
 
-            <input type="hidden" name="tree_ids" value="{{ item.id }}">
-            <label for="province_{{ item.id }}" class="block text-sm text-gray-700">จังหวัดที่ต้องการปลูก:</label>
-            <select name="province_{{ item.id }}" id="province_{{ item.id }}" class="w-full border rounded px-3 py-2 shadow-sm" required>
-              <option value="" disabled selected>เลือกจังหวัด</option>
+            <label for="province_{{ item.id }}" class="block text-sm font-medium text-gray-700">เลือกจังหวัด:</label>
+            <select name="province_{{ item.id }}" id="province_{{ item.id }}" required
+                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500">
+              <option value="">-- กรุณาเลือกจังหวัด --</option>
               {% for province in provinces %}
-                <option value="{{ province }}">{{ province }}</option>
+              <option value="{{ province }}">{{ province }}</option>
               {% endfor %}
             </select>
           </div>
         </div>
+      </li>
       {% endfor %}
+    </ul>
 
-      <div class="flex justify-between pt-2">
-        <a href="{% url 'myapp:cart' %}" class="text-orange-500 hover:underline">← ย้อนกลับไปตะกร้า</a>
-        <button type="submit" class="bg-green-600 hover:bg-green-500 text-white px-6 py-2 rounded-lg shadow">
-          ดำเนินการชำระเงิน
-        </button>
-      </div>
-    </form>
-  {% else %}
-    <p class="text-center text-gray-500">ไม่มีต้นไม้ในตะกร้า</p>
-  {% endif %}
+    <button type="submit"
+            class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-4 rounded-xl transition">
+      ยืนยันจังหวัดและดำเนินการชำระเงิน
+    </button>
+  </form>
 </div>
 {% endblock %}

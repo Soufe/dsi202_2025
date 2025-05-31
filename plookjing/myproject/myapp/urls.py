@@ -49,4 +49,6 @@ urlpatterns = [
     path('my-orders/', views.my_orders, name='my_orders'),
     path('my-trees/', views.my_trees, name='my_trees'),
 
+    path('tree/confirm/', views.confirm_tree_order, name='confirm_tree_order'),
+
 ]

@@ -3,8 +3,8 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .models import Tree, Equipment, Notification, Purchase, UserPlanting
-from datetime import datetime
+from .models import Tree, Equipment, Notification, UserPlanting, UserEquipment
+from datetime import datetime, date
 import stripe
 from django.conf import settings
 from .promptpay_qr import generate_promptpay_qr_payload
@@ -13,6 +13,8 @@ import qrcode
 import io
 import base64
 from collections import defaultdict
+from django.utils import timezone
+
 
 
 # 🏠 หน้าแรก
@@ -215,7 +217,7 @@ def user_profile(request):
 # 🧾 ประวัติการสั่งซื้อ
 @login_required
 def purchase_history(request):
-    purchases = Purchase.objects.filter(user=request.user).order_by('-created_at')
+    purchases = UserEquipment.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'myapp/purchase_history.html', {'purchases': purchases})
 
 # 🔔 การแจ้งเตือน
@@ -261,6 +263,56 @@ def tree_order(request, tree_id):
         'provinces': provinces,
     })
 
+@login_required
+def confirm_tree_order(request):
+    if request.method == 'POST':
+        cart = request.session.get('cart', [])
+        tree_cart = []
+        
+        for item in cart:
+            if item.get('type') == 'tree':
+                try:
+                    tree = Tree.objects.get(id=item['id'])
+                    quantity = int(item.get('quantity', 1))
+                    price = float(tree.price)
+                    total_price = price * quantity
+                    province = request.POST.get(f'province_{item["id"]}', '')
+                    
+                    if not province:
+                        continue  # ข้ามถ้ายังไม่เลือกจังหวัด
+
+                    tree_cart.append({
+                        'id': tree.id,
+                        'name': tree.name,
+                        'image_url': tree.image.url if tree.image else '',
+                        'quantity': quantity,
+                        'price': price,
+                        'total_price': total_price,
+                        'province': province,
+                    })
+                except Tree.DoesNotExist:
+                    continue
+
+        if not tree_cart:
+            return redirect('myapp:tree_order')  # กลับไปถ้าไม่มีข้อมูล
+
+        total = sum(item['total_price'] for item in tree_cart)
+        now = timezone.now()
+        qr_base64 = create_promptpay_qr_base64("0922894514", total)
+
+        request.session['tree_payment_items'] = tree_cart
+
+        return render(request, 'myapp/payment_tree.html', {
+            'items': tree_cart,
+            'total': total,
+            'qr_base64': qr_base64,
+            'order_date': now.strftime("%Y-%m-%d %H:%M"),
+            'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}",
+        })
+
+    return redirect('myapp:tree_order')
+
+
 
 
 
@@ -300,18 +352,22 @@ def payment_tree(request):
 
     for item in cart:
         if item.get('type') == 'tree':
-            tree = get_object_or_404(Tree, id=item['id'])
-            quantity = int(item.get('quantity', 1))
-            price = float(tree.price)
-            total_price = price * quantity
-            tree_cart.append({
-                'id': tree.id,
-                'name': tree.name,
-                'image_url': tree.image.url if tree.image else '',
-                'quantity': quantity,
-                'price': price,
-                'total_price': total_price,
-            })
+            try:
+                tree = Tree.objects.get(id=item['id'])
+                quantity = int(item.get('quantity', 1))
+                price = float(tree.price)
+                total_price = price * quantity
+                tree_cart.append({
+                    'id': tree.id,
+                    'name': tree.name,
+                    'image_url': tree.image.url if tree.image else '',
+                    'quantity': quantity,
+                    'price': price,
+                    'province': item.get('province', '-'),
+                    'total_price': total_price,
+                })
+            except Tree.DoesNotExist:
+                continue
 
     total = sum(item['total_price'] for item in tree_cart)
     now = datetime.now()
@@ -321,8 +377,8 @@ def payment_tree(request):
         'items': tree_cart,
         'total': total,
         'qr_base64': qr_base64,
+        'order_date': now.strftime("%Y-%m-%d %H:%M"),
         'order_id': f"TREE{now.strftime('%Y%m%d%H%M%S')}",
-        'order_date': now.strftime('%Y-%m-%d %H:%M'),
     })
 
 
@@ -330,59 +386,40 @@ def payment_tree(request):
 def upload_slip_tree(request):
     if request.method == 'POST' and request.FILES.get('slip'):
         slip = request.FILES['slip']
-        cart = request.session.get('cart', [])
+        # ✅ TODO: บันทึก slip, สร้าง Purchase, หรือ update session/database
 
-        # ✅ Loop สร้าง UserPlanting สำหรับแต่ละต้นไม้ในตะกร้า
-        for item in cart:
-            if item['type'] == 'tree':
-                tree = get_object_or_404(Tree, id=item['id'])
-                quantity = int(item.get('quantity', 1))
-
-                for _ in range(quantity):
-                    UserPlanting.objects.create(
-                        user=request.user,
-                        tree=tree,
-                        location="ยังไม่ได้เลือก",  # แก้ภายหลัง
-                        planted_date=date.today(),
-                        status='pending',
-                    )
-
-        # ✅ ลบ tree จาก cart หลังจ่ายเงิน
-        request.session['cart'] = [item for item in cart if item['type'] != 'tree']
-        request.session.modified = True
-
+        # ✅ redirect ไปหน้า my_trees
         return redirect('myapp:my_trees')
 
-    return redirect('home')  # fallback ถ้าไม่ใช่ POST
+    return redirect('myapp:select_tree')
 
 
 
 
-def confirm_tree_payment(request):
+
+@login_required
+def confirm_payment_tree(request):
     if request.method == 'POST':
-        user = request.user
-        cart = request.session.get('checkout_cart', [])
-        tree_location = request.session.get('tree_location')  # สมมติคุณเก็บไว้แบบนี้
+        cart = request.session.get('cart', [])
+        selected_tree_ids = []
+        province_map = {}
 
-        for item in cart:
-            if item['type'] == 'tree':
-                tree_id = item['id']
-                quantity = item.get('quantity', 1)
-                tree = Tree.objects.get(id=tree_id)
+        for key in request.POST:
+            if key.startswith('tree_ids_'):
+                tree_id = request.POST[key]
+                province = request.POST.get(f'province_{tree_id}')
+                if province:
+                    selected_tree_ids.append(tree_id)
+                    province_map[tree_id] = province
 
-                for _ in range(quantity):
-                    UserPlanting.objects.create(
-                        user=user,
-                        tree=tree,
-                        location=tree_location,
-                        status='pending'  # สถานะเริ่มต้น
-                    )
+        request.session['selected_tree_ids'] = selected_tree_ids
+        request.session['province_map'] = province_map
 
-        # ✅ ลบเฉพาะ tree ออกจาก cart
-        request.session['cart'] = [item for item in cart if item['type'] != 'tree']
-        request.session.modified = True
+        return redirect('myapp:payment_tree')
 
-        return redirect('my_trees')  # ส่งไปหน้าต้นไม้ของฉัน
+
+
+
 
 
 @login_required
@@ -409,7 +446,7 @@ def my_trees(request):
     for p in plantings:
         key = (p.tree.id, p.status)
         grouped[key]['quantity'] += getattr(p, 'quantity', 1)
-        grouped[key]['locations'].add(p.location)
+        grouped[key]['locations'].add(p.location_name)
         grouped[key]['planted_date'] = p.planted_date
         grouped[key]['tree'] = p.tree
         grouped[key]['status'] = p.status
@@ -441,40 +478,35 @@ def my_trees(request):
 
 
 
+
+
+
+
 @login_required
 def payment_equipment(request):
-    cart = request.session.get('cart', [])
-    equipment_cart = []
+    if request.method == 'POST' and request.FILES.get('slip'):
+        slip = request.FILES['slip']
+        cart = request.session.get('checkout_cart', [])
+        order_info = request.session.get('order_info', {})
 
-    for item in cart:
-        if item.get('type') == 'equipment':
-            try:
-                equipment = Equipment.objects.get(id=item['id'])
-                quantity = int(item.get('quantity', 1))
-                price = float(equipment.price)
-                total_price = price * quantity
-                equipment_cart.append({
-                    'id': equipment.id,
-                    'name': equipment.name,
-                    'image_url': equipment.image.url if equipment.image else '',
-                    'quantity': quantity,
-                    'price': price,
-                    'total_price': total_price,
-                })
-            except Equipment.DoesNotExist:
-                continue
+        for item in cart:
+            if item['type'] == 'equipment':
+                UserEquipment.objects.create(
+                    user=request.user,
+                    equipment_id=item['id'],
+                    quantity=item['quantity'],
+                    address=order_info.get('address', ''),
+                    tel=order_info.get('tel', ''),
+                    payment_slip=slip,
+                    status='pending',  # ✅ default after payment
+                )
 
-    total = sum(item['total_price'] for item in equipment_cart)
-    now = datetime.now()
-    qr_base64 = create_promptpay_qr_base64("0922894514", total)
+        # ✅ Clear session cart
+        request.session['checkout_cart'] = []
 
-    return render(request, 'myapp/payment_equipment.html', {
-        'items': equipment_cart,
-        'total': total,
-        'qr_base64': qr_base64,
-        'order_date': now.strftime("%Y-%m-%d %H:%M"),
-        'order_id': f"EQUIP{now.strftime('%Y%m%d%H%M%S')}",
-    })
+        return redirect('myapp:my_orders')  # ✅ ลิงก์ไปหน้าแสดงรายการ
+    return redirect('myapp:equipment_list')
+
 
 
 @login_required
@@ -488,10 +520,33 @@ def upload_slip_equipment(request):
         return redirect('myapp:my_orders')
     return redirect('home')  # fallback ถ้าไม่ใช่ POST
 
+
+
+
+
+
 @login_required
 def my_orders(request):
-    orders = Purchase.objects.filter(user=request.user, type='equipment').order_by('-created_at')
-    return render(request, 'myapp/my_orders.html', {'orders': orders})
+    all_orders = UserEquipment.objects.filter(
+        user=request.user,
+        payment_slip__isnull=False  # ✅ เฉพาะที่จ่ายเงินแล้ว (แนบสลิปแล้ว)
+    ).order_by('-created_at')
+
+    status_filter = request.GET.get('status', 'ทั้งหมด')
+    if status_filter != 'ทั้งหมด':
+        filtered_orders = all_orders.filter(status=status_filter)
+    else:
+        filtered_orders = all_orders
+
+    status_choices = [choice[0] for choice in UserEquipment.STATUS_CHOICES]
+    status_choices.insert(0, 'ทั้งหมด')
+
+    return render(request, 'myapp/my_orders.html', {
+        'orders': filtered_orders,
+        'selected_status': status_filter,
+        'status_choices': status_choices,
+    })
+
 
 
 
